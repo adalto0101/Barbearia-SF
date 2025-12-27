@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barbearia SF - Agendamento</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>Barbearia SF</h1>
+        <p>Reserve seu horário abaixo:</p>
+
+        <form id="form-agendamento">
+            <input type="text" id="nome" placeholder="Seu nome completo" required>
+            
+            <select id="servico" required>
+                <option value="" disabled selected>Escolha o serviço</option>
+                <option value="Corte">Corte Masculino</option>
+                <option value="Barba">Barba</option>
+                <option value="Combo">Combo (Corte + Barba)</option>
+            </select>
+
+            <input type="datetime-local" id="data-hora" required>
+
+            <button type="submit" id="btn-enviar">Agendar Agora</button>
+        </form>
+
+        <div id="mensagem"></div>
+    </div>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>
