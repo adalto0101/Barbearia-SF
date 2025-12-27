@@ -9,26 +9,25 @@
 <body>
 
     <div class="container">
-        <h1>Barbearia SF</h1>
-        <p>Reserve seu horário abaixo:</p>
+    <h1>BARBEARIA SF</h1>
+    
+    <div id="step-1">
+        <label>Seu Nome</label>
+        <input type="text" id="cliente-nome" placeholder="Ex: João Silva">
 
-        <form id="form-agendamento">
-            <input type="text" id="nome" placeholder="Seu nome completo" required>
-            
-            <select id="servico" required>
-                <option value="" disabled selected>Escolha o serviço</option>
-                <option value="Corte">Corte Masculino</option>
-                <option value="Barba">Barba</option>
-                <option value="Combo">Combo (Corte + Barba)</option>
-            </select>
+        <label>Escolha o Dia</label>
+        <input type="date" id="data-agenda">
 
-            <input type="datetime-local" id="data-hora" required>
+        <label>Horários Disponíveis</label>
+        <div class="horarios-grid" id="grid-horarios">
+            </div>
 
-            <button type="submit" id="btn-enviar">Agendar Agora</button>
-        </form>
-
-        <div id="mensagem"></div>
+        <button class="btn-finalizar" id="btn-agendar">CONFIRMAR AGENDAMENTO</button>
     </div>
+    <div id="status"></div>
+</div>
+
+<script type="module" src="script.js"></script>
 
     <script type="module" src="script.js"></script>
 </body>
