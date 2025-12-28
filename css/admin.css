@@ -33,7 +33,62 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center; /* ISSO CENTRALIZA O LOGIN VERTICALMENTE */
   padding: 20px;
+}
+
+/* Esconder as seções por padrão para evitar a piscada */
+#login-section, #admin-section {
+  display: none;
+}
+
+/* Ajuste dos Títulos do Login */
+.titulo {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: 2rem;
+  color: var(--dourado);
+  margin-bottom: 5px;
+}
+
+.subtitulo {
+  font-size: 1rem;
+  opacity: 0.8;
+  margin-bottom: 25px;
+}
+
+/* LOGIN CONTAINER (FIXO) */
+.login-container {
+  background: rgba(13, 13, 13, 0.95);
+  border: 1px solid var(--dourado);
+  padding: 40px 30px;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 400px;
+  text-align: center; /* Centraliza textos */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+  /* Removido o margin: auto para não conflitar com o body flex */
+}
+
+/* Ajuste do Wrapper da Senha para o Olho não voar */
+.senha-wrapper {
+  position: relative;
+  width: 100%;
+  margin-bottom: 15px; /* Espaço para o botão */
+}
+
+.senha-wrapper input {
+  margin-bottom: 0 !important; /* Remove margem dupla */
+  padding-right: 45px; /* Espaço para o olho */
+}
+
+#toggle-senha {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  z-index: 10;
+  font-size: 1.2rem;
 }
 
 /* ------------------------------
