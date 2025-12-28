@@ -28,10 +28,14 @@
   </div>
 
   <div id="admin-section" class="admin-container" style="display:none;">
-    <header>
-      <h1>Painel Administrativo</h1>
+  <header>
+    <h1>Painel Administrativo</h1>
+    <div>
+      <button onclick="window.location.href='gestao.html'" class="btn-edit-ordem"
+        style="margin-right:10px; background:#3498db; color:white;">📊 Gestão</button>
       <button id="logout" class="btn-logout">Sair</button>
-    </header>
+    </div>
+  </header>
 
     <nav class="admin-nav">
       <button id="btn-agendamentos" class="active">Agendamentos</button>
@@ -60,6 +64,7 @@
   <script type="module" src="js/admin.js"></script>
 </body>
 </html>
+
 
 
 
