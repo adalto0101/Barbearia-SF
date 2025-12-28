@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
+import { getDatabase, ref, push, onValue, get } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
 
 // --- CONFIG FIREBASE ---
 const firebaseConfig = {
@@ -29,6 +29,12 @@ let duracaoSelecionada = 0;
 let horariosFuncionamento = {};
 let servicosDisponiveis = {};
 
+// Função auxiliar para converter "HH:mm" em minutos totais desde o início do dia
+function paraMinutos(horaStr) {
+    const [h, m] = horaStr.split(':').map(Number);
+    return h * 60 + m;
+}
+
 // --- 1️⃣ CARREGA SERVIÇOS E HORÁRIOS DE FUNCIONAMENTO ---
 onValue(ref(db, 'servicos'), (snapshot) => {
   servicosDisponiveis = snapshot.val() || {};
@@ -49,7 +55,11 @@ onValue(ref(db, 'horarios_funcionamento'), (snapshot) => {
 // --- 2️⃣ AO ESCOLHER DATA → MOSTRA SERVIÇOS ---
 if (inputData) {
   inputData.onchange = () => {
-    if (inputData.value) secaoServico.style.display = 'block';
+    if (inputData.value) {
+        secaoServico.style.display = 'block';
+        // Se já tiver serviço selecionado, atualiza horários ao mudar data
+        if (inputServico.value) gerarHorarios();
+    }
   };
 
   // --- 3️⃣ AO ESCOLHER SERVIÇO → MOSTRA HORÁRIOS DISPONÍVEIS ---
@@ -62,84 +72,76 @@ if (inputData) {
   };
 }
 
-// --- 4️⃣ GERA HORÁRIOS DISPONÍVEIS ---
-  function gerarHorarios() {
+// --- 4️⃣ GERA HORÁRIOS DISPONÍVEIS COM LÓGICA DE COLISÃO ---
+function gerarHorarios() {
     secaoHorarios.style.display = 'block';
-    gridHorarios.innerHTML = "";
+    gridHorarios.innerHTML = "<p>Verificando disponibilidade...</p>";
 
     const dataSelecionada = inputData.value;
-    if (!dataSelecionada) return;
+    if (!dataSelecionada || !servicoSelecionado) return;
 
     const [ano, mes, dia] = dataSelecionada.split('-').map(Number);
     const dataObj = new Date(ano, mes - 1, dia);
-
-    // Define o dia da semana (local)
-    const dias = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
+    const dias = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'];
     const diaSemana = dias[dataObj.getDay()];
 
-    // Corrige acentos e busca no Firebase
-    const diaChave = Object.keys(horariosFuncionamento).find(k =>
-      k.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') ===
-      diaSemana.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    );
-
-    const horarioDia = horariosFuncionamento[diaChave];
+    const horarioDia = horariosFuncionamento[diaSemana];
 
     if (!horarioDia || horarioDia.fechado) {
-      gridHorarios.innerHTML = `<p style="color:#ff4d4d;">❌ Barbearia fechada neste dia.</p>`;
-      return;
+        gridHorarios.innerHTML = `<p style="color:#ff4d4d;">❌ Barbearia fechada neste dia.</p>`;
+        return;
     }
 
-    const inicio = horarioDia.inicio;
-    const fim = horarioDia.fim;
-    const duracao = servicoSelecionado?.duracao || 30;
+    const minInicio = paraMinutos(horarioDia.inicio);
+    const minFim = paraMinutos(horarioDia.fim);
+    const duracaoNovo = Number(servicoSelecionado.duracao);
 
-    const [horaInicio, minInicio] = inicio.split(':').map(Number);
-    const [horaFim, minFim] = fim.split(':').map(Number);
-
-    const horarios = [];
-    let hora = horaInicio;
-    let minuto = minInicio;
-
-    // gera blocos de horário conforme duração do serviço
-    while (hora < horaFim || (hora === horaFim && minuto < minFim)) {
-      const horaStr = `${String(hora).padStart(2, '0')}:${String(minuto).padStart(2, '0')}`;
-      horarios.push(horaStr);
-      minuto += duracao;
-      if (minuto >= 60) {
-        hora++;
-        minuto -= 60;
-      }
-    }
-
-    // verifica horários já agendados
+    // Busca agendamentos do dia para comparar
     onValue(ref(db, 'agendamentos'), (snapshot) => {
-      const agendados = snapshot.val() || {};
-      const ocupados = Object.values(agendados)
-        .filter(a => a.data === dataSelecionada)
-        .map(a => a.hora);
+        const agendamentos = snapshot.val() || {};
+        const agendadosHoje = Object.values(agendamentos).filter(a => a.data === dataSelecionada);
 
-      gridHorarios.innerHTML = "";
-      horarios.forEach(hora => {
-        const btn = document.createElement('div');
-        btn.classList.add('time-slot');
-        btn.innerText = hora;
+        gridHorarios.innerHTML = "";
 
-        if (ocupados.includes(hora)) {
-          btn.classList.add('indisponivel');
-          btn.innerText = `${hora} ✖`;
-          btn.style.opacity = "0.5";
-          btn.style.pointerEvents = "none";
-        } else {
-          btn.onclick = () => {
-            document.querySelectorAll('.time-slot').forEach(el => el.classList.remove('selected'));
-            btn.classList.add('selected');
-            horaSelecionada = hora;
-            btnAgendar.style.display = 'block';
-          };
+        // Gerar slots de 10 em 10 minutos para maior precisão
+        for (let tempo = minInicio; tempo + duracaoNovo <= minFim; tempo += 10) {
+            const fimNovo = tempo + duracaoNovo;
+            let conflito = false;
+
+            // Verifica se este intervalo de tempo (tempo até fimNovo) colide com algum agendamento
+            agendadosHoje.forEach(ag => {
+                const inicioExistente = paraMinutos(ag.hora);
+                const duracaoExistente = Number(ag.duracao) || 30;
+                const fimExistente = inicioExistente + duracaoExistente;
+
+                // Lógica de colisão: se o novo começa antes do existente terminar 
+                // E o novo termina depois que o existente começou
+                if (tempo < fimExistente && fimNovo > inicioExistente) {
+                    conflito = true;
+                }
+            });
+
+            const horaStr = `${String(Math.floor(tempo / 60)).padStart(2, '0')}:${String(tempo % 60).padStart(2, '0')}`;
+            
+            const btn = document.createElement('div');
+            btn.classList.add('time-slot');
+            btn.innerText = horaStr;
+
+            if (conflito) {
+                btn.classList.add('indisponivel');
+                btn.style.opacity = "0.3";
+                btn.style.pointerEvents = "none";
+                btn.style.textDecoration = "line-through";
+            } else {
+                btn.onclick = () => {
+                    document.querySelectorAll('.time-slot').forEach(el => el.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    horaSelecionada = horaStr;
+                    btnAgendar.style.display = 'block';
+                };
+            }
+            gridHorarios.appendChild(btn);
         }
-        gridHorarios.appendChild(btn);
-      });
     }, { onlyOnce: true });
 }
 
@@ -156,28 +158,20 @@ btnAgendar.onclick = async () => {
   }
 
   const servicoInfo = servicosDisponiveis[servicoID];
-  const nomeServico = servicoInfo?.nome || 'Serviço';
 
   await push(ref(db, 'agendamentos'), {
     cliente: nome,
     whatsapp,
-    servico: nomeServico,
+    servico: servicoInfo.nome,
     data,
     hora: horaSelecionada,
-    duracao: servicoInfo?.duracao || 30,
+    duracao: Number(servicoInfo.duracao), // Garante que salva como número para o cálculo futuro
     timestamp: Date.now()
   });
-
-  const dataBR = data.split('-').reverse().join('/');
-  const msg = encodeURIComponent(`Olá ${nome}, confirmamos seu agendamento na Barbearia SF para ${dataBR} às ${horaSelecionada} (${nomeServico}).`);
-  const urlWhats = `https://wa.me/55${whatsapp}?text=${msg}`;
 
   document.getElementById('modal-sucesso').style.display = 'flex';
   document.getElementById('fechar-modal').onclick = () => {
     document.getElementById('modal-sucesso').style.display = 'none';
     window.location.reload();
   };
-
-  // window.open(urlWhats, "_blank"); // opcional
 };
-
