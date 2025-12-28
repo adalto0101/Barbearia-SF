@@ -1,6 +1,11 @@
 /* ------------------------------
    PAINEL DO BARBEIRO - BARBEARIA SF
 --------------------------------*/
+
+#login-section, #admin-section {
+    display: none; 
+}
+
 :root {
   --preto: #0d0d0d;
   --cinza: #2e2e2e;
