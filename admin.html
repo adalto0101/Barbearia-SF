@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel do Barbeiro - Barbearia SF</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500&family=Cinzel+Decorative:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+
+  <nav class="admin-nav">
+  <button id="btn-agendamentos" class="active">Agendamentos</button>
+  <button id="btn-servicos">Serviços</button>
+</nav>
+
+<!-- Conteúdo de Agendamentos -->
+<section id="sec-agendamentos">
+  <h2>📅 Agendamentos</h2>
+  <div id="lista-agendamentos"></div>
+</section>
+
+<!-- Conteúdo de Serviços -->
+<section id="sec-servicos" style="display:none;">
+  <h2>💈 Serviços</h2>
+
+  <form id="form-servico" class="form-servico">
+    <input type="text" id="serv-nome" placeholder="Nome do serviço" required>
+    <input type="number" id="serv-preco" placeholder="Preço (R$)" required>
+    <input type="number" id="serv-duracao" placeholder="Duração (min)" required>
+    <input type="time" id="serv-inicio" value="09:00" required>
+    <input type="time" id="serv-fim" value="18:00" required>
+    <button type="submit" class="btn-save">Salvar Serviço</button>
+  </form>
+
+  <div id="lista-servicos"></div>
+</section>
+
+
+  <div id="login-section" class="login-container">
+    <h1 class="titulo">Barbearia SF</h1>
+    <p class="subtitulo">Painel do Barbeiro</p>
+
+    <form id="login-form" class="login-box">
+      <label for="email">E-mail</label>
+      <input type="email" id="email" placeholder="admin@gmail.com" required>
+
+      <label for="senha">Senha</label>
+      <input type="password" id="senha" placeholder="••••••••" required>
+
+      <button type="submit" class="btn-login">Entrar</button>
+      <p id="erro-login" class="erro"></p>
+    </form>
+  </div>
+
+  <div id="admin-section" class="admin-container" style="display:none;">
+    <header>
+      <h1>Painel de Agendamentos</h1>
+      <button id="logout" class="btn-logout">Sair</button>
+    </header>
+
+    <section id="lista-agendamentos" class="lista"></section>
+  </div>
+  
+  <script type="module" src="js/auth.js"></script>
+  <script type="module" src="js/admin.js"></script>
+
+</body>
+</html>

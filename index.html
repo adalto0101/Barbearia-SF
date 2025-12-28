@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Barbearia SF — Estilo e Tradição</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500&family=Cinzel+Decorative:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="overlay"></div>
+
+  <header>
+    <h1 class="titulo">Barbearia SF</h1>
+    <p class="subtitulo">Estilo e Tradição</p>
+  </header>
+
+  <main class="container">
+    <form id="bookingForm" class="form-box">
+      <label>Nome</label>
+      <input type="text" id="cliente-nome" placeholder="Seu nome" required>
+
+      <label>WhatsApp</label>
+      <input type="tel" id="cliente-whatsapp" placeholder="(00) 00000-0000" required>
+
+      <label>Serviço</label>
+      <select id="cliente-servico" required>
+        <option value="">Selecione</option>
+        <option value="Corte">Corte</option>
+        <option value="Barba">Barba</option>
+        <option value="Sobrancelha">Sobrancelha</option>
+      </select>
+
+      <label>Data</label>
+      <input type="date" id="data-agenda" required>
+
+      <section id="secao-servico" style="display:none;">
+        <h3>Selecione o horário</h3>
+      </section>
+
+      <section id="secao-horarios" style="display:none;">
+        <div id="grid-horarios" class="grid-horarios"></div>
+        <button type="button" id="btn-agendar" class="btn-agendar" style="display:none;">Confirmar Agendamento</button>
+      </section>
+    </form>
+  </main>
+
+  <a href="admin.html" class="btn-admin" title="Painel do Barbeiro">
+    🔒
+  </a>
+
+  <script type="module" src="js/app.js"></script>
+
+  <!-- MODAL DE CONFIRMAÇÃO -->
+<div id="modal-sucesso" class="modal-overlay">
+  <div class="modal-box">
+    <h2>✅ Agendamento Confirmado!</h2>
+    <p>Seu horário foi reservado com sucesso.</p>
+    <button id="fechar-modal">Fechar</button>
+  </div>
+</div>
+
+
+
+</body>
+</html>
