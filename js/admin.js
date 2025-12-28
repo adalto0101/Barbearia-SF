@@ -152,10 +152,19 @@ formServico.onsubmit = (e) => {
 
 // --- 5️⃣ INICIALIZAÇÃO ---
 // Lógica de Login simples para alternar as telas
+// --- 5️⃣ INICIALIZAÇÃO ---
+
+// Esta função garante que os dados só sejam buscados se o Firebase confirmar que você está logado.
+// Ela resolve o problema de recarregar a página (F5) e o login sumir.
 window.addEventListener('auth-ready', () => {
-    carregarAgendamentos();
-    carregarServicos();
+  console.log("Sessão ativa detectada. Carregando agendamentos e serviços...");
+  
+  if (typeof carregarAgendamentos === "function") carregarAgendamentos();
+  if (typeof carregarServicos === "function") carregarServicos();
 });
+
+// Nota: Removido o código de 'onsubmit' e 'logout' daqui, 
+// pois agora eles são gerenciados centralizadamente pelo auth.js.
 };
 
 // Caso você use o Firebase Auth no auth.js, ele cuidará do redirecionamento.
