@@ -1,0 +1,297 @@
+/* ------------------------------
+   PAINEL DO BARBEIRO - BARBEARIA SF
+--------------------------------*/
+:root {
+  --preto: #0d0d0d;
+  --cinza: #2e2e2e;
+  --dourado: #d4af37;
+  --branco: #f5f5f5;
+  --vermelho: #e63946;
+  --verde: #2ecc71;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  min-height: 100vh;
+  color: var(--branco);
+  background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)),
+              url('https://images.unsplash.com/photo-1585747860715-2ba37e788b70?q=80&w=2074&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ------------------------------
+   LOGIN
+--------------------------------*/
+.login-container {
+  background: rgba(13,13,13,0.9);
+  border: 1px solid rgba(212,175,55,0.4);
+  padding: 40px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  box-shadow: 0 0 20px rgba(0,0,0,0.5);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+
+
+.titulo {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: 2rem;
+  color: var(--dourado);
+}
+
+.subtitulo {
+  font-size: 1rem;
+  color: var(--branco);
+  opacity: 0.8;
+  margin-bottom: 25px;
+}
+
+.login-box label {
+  display: block;
+  text-align: left;
+  color: var(--dourado);
+  margin-top: 15px;
+}
+
+.login-box input {
+  width: 100%;
+  margin-top: 5px;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  background: var(--cinza);
+  color: var(--branco);
+  outline: none;
+  transition: border 0.3s;
+}
+
+.login-box input:focus {
+  border: 1px solid var(--dourado);
+}
+
+.btn-login {
+  margin-top: 25px;
+  width: 100%;
+  padding: 12px;
+  background: var(--dourado);
+  border: none;
+  border-radius: 6px;
+  color: var(--preto);
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-login:hover {
+  background: #e0c157;
+  transform: translateY(-2px);
+  box-shadow: 0 0 10px rgba(212,175,55,0.5);
+}
+
+.erro {
+  margin-top: 15px;
+  color: var(--vermelho);
+  font-size: 0.9rem;
+}
+
+/* ------------------------------
+   PAINEL ADMIN
+--------------------------------*/
+.admin-container {
+  width: 100%;
+  max-width: 800px;
+  background: rgba(13,13,13,0.9);
+  border: 1px solid rgba(212,175,55,0.3);
+  border-radius: 10px;
+  padding: 25px;
+  margin: 30px auto;
+  box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  border-bottom: 1px solid rgba(212,175,55,0.3);
+  padding-bottom: 10px;
+}
+
+header h1 {
+  font-family: 'Cinzel Decorative', serif;
+  color: var(--dourado);
+  font-size: 1.6rem;
+}
+
+.btn-logout {
+  background: transparent;
+  border: 1px solid var(--dourado);
+  color: var(--dourado);
+  border-radius: 6px;
+  padding: 8px 15px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-logout:hover {
+  background: var(--dourado);
+  color: var(--preto);
+}
+
+/* ------------------------------
+   LISTA DE AGENDAMENTOS
+--------------------------------*/
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.admin-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--cinza);
+  border: 1px solid rgba(212,175,55,0.3);
+  border-radius: 8px;
+  padding: 15px 20px;
+  transition: transform 0.2s;
+}
+
+.admin-card:hover {
+  transform: scale(1.02);
+}
+
+.admin-card strong {
+  color: var(--dourado);
+}
+
+.admin-card small {
+  display: block;
+  opacity: 0.8;
+  font-size: 0.9rem;
+}
+
+.btns-card {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-whatsapp, .btn-edit, .btn-delete {
+  text-decoration: none;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.3s;
+}
+
+.btn-whatsapp {
+  background: var(--verde);
+  color: #fff;
+}
+
+.btn-edit {
+  background: var(--dourado);
+  color: var(--preto);
+}
+
+.btn-delete {
+  background: var(--vermelho);
+  color: #fff;
+}
+
+.btn-whatsapp:hover, .btn-edit:hover, .btn-delete:hover {
+  opacity: 0.85;
+  transform: translateY(-1px);
+}
+
+/* ------------------------------
+   RESPONSIVIDADE
+--------------------------------*/
+@media (max-width: 600px) {
+  .admin-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .btns-card {
+    margin-top: 10px;
+    width: 100%;
+    justify-content: space-around;
+  }
+
+  .admin-container {
+    margin: 15px;
+    padding: 20px;
+  }
+}
+
+.admin-nav {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.admin-nav button {
+  background: var(--dark);
+  color: var(--gold);
+  border: 1px solid var(--gold);
+  padding: 8px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.admin-nav button.active,
+.admin-nav button:hover {
+  background: var(--gold);
+  color: #000;
+}
+
+.form-servico {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.form-servico input,
+.form-servico button {
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+#lista-servicos .servico-card {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid var(--gold);
+  border-radius: 6px;
+  padding: 10px;
+  margin: 5px auto;
+  max-width: 600px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
