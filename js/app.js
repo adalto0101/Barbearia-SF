@@ -80,17 +80,35 @@ function gerarHorarios() {
     const dataSelecionada = inputData.value;
     if (!dataSelecionada || !servicoSelecionado) return;
 
+    // Ajuste para pegar o dia da semana correto independente do fuso horário
     const [ano, mes, dia] = dataSelecionada.split('-').map(Number);
-    const dataObj = new Date(ano, mes - 1, dia);
-    const dias = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'];
-    const diaSemana = dias[dataObj.getDay()];
+    const dataObj = new Date(ano, mes - 1, dia); 
+    const indiceDia = dataObj.getDay();
 
-    const horarioDia = horariosFuncionamento[diaSemana];
+    // Esta lista DEVE corresponder exatamente às chaves do seu Firebase
+    // Se no seu Firebase "terça" tem acento, coloque aqui com acento.
+    // Se "sábado" tem acento, coloque aqui com acento.
+    const diasMap = [
+        'domingo', // 0
+        'segunda', // 1
+        'terça',   // 2 (ajustado com acento conforme imagem)
+        'quarta',  // 3
+        'quinta',  // 4
+        'sexta',   // 5
+        'sábado',  // 6 (ajustado com acento conforme imagem)
+    ];
 
-    if (!horarioDia || horarioDia.fechado) {
-        gridHorarios.innerHTML = `<p style="color:#ff4d4d;">❌ Barbearia fechada neste dia.</p>`;
+    const diaChave = diasMap[indiceDia];
+    const horarioDia = horariosFuncionamento[diaChave];
+
+    console.log("Tentando acessar dia:", diaChave); // Verifique isso no F12 do navegador
+
+    if (!horarioDia || horarioDia.fechado === true || horarioDia.fechado === "true") {
+        gridHorarios.innerHTML = `<p style="color:#ff4d4d;">❌ Barbearia fechada neste dia (${diaChave}).</p>`;
         return;
     }
+
+    // ... restante do código (onValue agendamentos) continua igual
 
     const minInicio = paraMinutos(horarioDia.inicio);
     const minFim = paraMinutos(horarioDia.fim);
