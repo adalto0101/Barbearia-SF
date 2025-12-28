@@ -152,12 +152,10 @@ formServico.onsubmit = (e) => {
 
 // --- 5️⃣ INICIALIZAÇÃO ---
 // Lógica de Login simples para alternar as telas
-document.getElementById('login-form').onsubmit = (e) => {
-  e.preventDefault();
-  document.getElementById('login-section').style.display = 'none';
-  document.getElementById('admin-section').style.display = 'block';
-  carregarAgendamentos();
-  carregarServicos();
+window.addEventListener('auth-ready', () => {
+    carregarAgendamentos();
+    carregarServicos();
+});
 };
 
 // Caso você use o Firebase Auth no auth.js, ele cuidará do redirecionamento.
