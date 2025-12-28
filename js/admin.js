@@ -163,9 +163,5 @@ window.addEventListener('auth-ready', () => {
   if (typeof carregarServicos === "function") carregarServicos();
 });
 
-// Nota: Removido o código de 'onsubmit' e 'logout' daqui, 
-// pois agora eles são gerenciados centralizadamente pelo auth.js.
-};
-
 // Caso você use o Firebase Auth no auth.js, ele cuidará do redirecionamento.
 // Se não, o submit acima garante a troca visual para você testar agora.
