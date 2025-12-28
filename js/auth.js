@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyB-f47rzgtMlM-LQbVZt7TnPQhoYZadBQ4",
@@ -14,66 +14,74 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
+// Configura o Firebase para lembrar do login mesmo se fechar o navegador
+setPersistence(auth, browserLocalPersistence);
+
 const loginSection = document.getElementById("login-section");
 const adminSection = document.getElementById("admin-section");
 const loginForm = document.getElementById("login-form");
 const erroLogin = document.getElementById("erro-login");
 const logoutBtn = document.getElementById("logout");
+const toggleSenha = document.getElementById("toggle-senha");
+const senhaInput = document.getElementById("senha");
+
+// --- FUNÇÃO OLHO (MOSTRAR SENHA) ---
+if (toggleSenha) {
+  toggleSenha.addEventListener("click", () => {
+    const type = senhaInput.getAttribute("type") === "password" ? "text" : "password";
+    senhaInput.setAttribute("type", type);
+    toggleSenha.textContent = type === "password" ? "👁️" : "🙈";
+  });
+}
 
 // --- LOGIN ---
 if (loginForm) {
   loginForm.addEventListener("submit", (e) => {
     e.preventDefault();
-    e.stopPropagation(); // Impede que outros scripts interfiram no clique
-
     const email = document.getElementById("email").value;
     const senha = document.getElementById("senha").value;
-
     const btn = loginForm.querySelector('button');
+
     btn.innerText = "Carregando...";
     btn.disabled = true;
 
     signInWithEmailAndPassword(auth, email, senha)
       .then(() => {
         erroLogin.textContent = "";
-        btn.innerText = "Entrar";
-        btn.disabled = false;
       })
       .catch((error) => {
-        console.error("Erro no login:", error.code);
+        console.error(error);
+        erroLogin.textContent = "❌ E-mail ou senha inválidos.";
+      })
+      .finally(() => {
         btn.innerText = "Entrar";
         btn.disabled = false;
-        
-        if (error.code === 'auth/invalid-credential') {
-            erroLogin.textContent = "❌ E-mail ou senha incorretos.";
-        } else {
-            erroLogin.textContent = "❌ Erro ao acessar o servidor.";
-        }
       });
   });
 }
 
-// --- OBSERVADOR DE AUTENTICAÇÃO ---
+// --- OBSERVADOR DE AUTENTICAÇÃO (PERSISTÊNCIA) ---
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    // Se logado, limpa a tela de login e mostra o painel
-    if (loginSection) loginSection.style.display = "none";
-    if (adminSection) adminSection.style.display = "block";
-    
-    // Dispara um evento para o admin.js saber que pode carregar os dados
+    loginSection.style.display = "none";
+    adminSection.style.display = "block";
+    // Dispara o evento para o admin.js carregar os dados
     window.dispatchEvent(new Event('auth-ready'));
   } else {
-    // Se deslogado, volta para o login
-    if (loginSection) loginSection.style.display = "flex";
-    if (adminSection) adminSection.style.display = "none";
+    loginSection.style.display = "flex";
+    adminSection.style.display = "none";
   }
 });
 
-// --- LOGOUT ---
+// --- LOGOUT (FIX) ---
 if (logoutBtn) {
-  logoutBtn.addEventListener("click", () => {
+  logoutBtn.onclick = (e) => {
+    e.preventDefault();
     signOut(auth).then(() => {
-      // O onAuthStateChanged cuidará de esconder o painel
+      alert("Sessão encerrada.");
+      window.location.reload(); // Recarrega para limpar tudo
+    }).catch((error) => {
+      console.error("Erro ao sair:", error);
     });
-  });
+  };
 }
