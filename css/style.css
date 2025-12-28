@@ -1,1 +1,260 @@
-teste
+/* ------------------------------
+   ESTILO GERAL - BARBEARIA SF
+--------------------------------*/
+:root {
+  --preto: #0d0d0d;
+  --cinza: #2e2e2e;
+  --dourado: #d4af37;
+  --branco: #f5f5f5;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  min-height: 100vh;
+  color: var(--branco);
+  background: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1)),
+              url('https://images.unsplash.com/photo-1585747860715-2ba37e788b70?q=80&w=2074&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 40px 15px;
+}
+
+/* Overlay opcional */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  z-index: -1;
+}
+
+/* ------------------------------
+   CABEÇALHO
+--------------------------------*/
+header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.titulo {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: 3rem;
+  color: var(--dourado);
+  letter-spacing: 3px;
+}
+
+.subtitulo {
+  font-size: 1.2rem;
+  color: var(--branco);
+  opacity: 0.85;
+}
+
+/* ------------------------------
+   CONTAINER PRINCIPAL
+--------------------------------*/
+.container {
+  background: rgba(13,13,13,0.85);
+  border: 1px solid rgba(212,175,55,0.3);
+  border-radius: 10px;
+  padding: 30px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.5);
+  backdrop-filter: blur(8px);
+}
+
+label {
+  display: block;
+  margin-top: 15px;
+  font-weight: 500;
+  color: var(--dourado);
+}
+
+input, select {
+  width: 100%;
+  margin-top: 5px;
+  padding: 10px;
+  border-radius: 5px;
+  border: none;
+  outline: none;
+  font-size: 1rem;
+  background: var(--cinza);
+  color: var(--branco);
+}
+
+input:focus, select:focus {
+  border: 1px solid var(--dourado);
+  background: #1a1a1a;
+}
+
+h3 {
+  color: var(--dourado);
+  text-align: center;
+  margin-top: 25px;
+}
+
+/* ------------------------------
+   HORÁRIOS / BOTÕES
+--------------------------------*/
+.grid-horarios {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.time-slot, .horario {
+  background: var(--cinza);
+  border: 1px solid rgba(212,175,55,0.3);
+  padding: 10px 0;
+  text-align: center;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--branco);
+  transition: all 0.3s ease;
+}
+
+.time-slot:hover, .horario:hover {
+  background: var(--dourado);
+  color: var(--preto);
+}
+
+.time-slot.selected, .horario.active {
+  background: var(--dourado);
+  color: var(--preto);
+  font-weight: bold;
+  transform: scale(1.05);
+}
+
+.horario.indisponivel {
+  background: #333;
+  color: #777;
+  cursor: not-allowed;
+}
+
+.btn-agendar {
+  margin-top: 25px;
+  width: 100%;
+  padding: 12px;
+  background: var(--dourado);
+  border: none;
+  border-radius: 6px;
+  color: var(--preto);
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-agendar:hover {
+  background: #e0c157;
+  transform: translateY(-2px);
+  box-shadow: 0 0 10px rgba(212,175,55,0.5);
+}
+
+/* ------------------------------
+   BOTÃO ADMIN (CADEADO)
+--------------------------------*/
+.btn-admin {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: rgba(0,0,0,0.7);
+  color: var(--dourado);
+  padding: 10px 13px;
+  font-size: 1.2rem;
+  border-radius: 50%;
+  text-decoration: none;
+  box-shadow: 0 0 8px rgba(0,0,0,0.6);
+  transition: all 0.3s;
+}
+
+.btn-admin:hover {
+  background: var(--dourado);
+  color: var(--preto);
+  transform: scale(1.1);
+}
+
+/* ------------------------------
+   RESPONSIVIDADE
+--------------------------------*/
+@media (max-width: 768px) {
+  body {
+    padding: 20px 10px;
+  }
+
+  .titulo {
+    font-size: 2.2rem;
+  }
+
+  .container {
+    padding: 20px;
+  }
+
+  .grid-horarios {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .titulo {
+    font-size: 1.8rem;
+  }
+
+  .btn-admin {
+    bottom: 15px;
+    right: 15px;
+    padding: 8px 10px;
+  }
+}
+
+/* ------------------------------
+   MODAL PERSONALIZADO
+--------------------------------*/
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modal-box {
+  background: #111;
+  border: 1px solid var(--gold);
+  color: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  text-align: center;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+.modal-box button {
+  margin-top: 20px;
+  background: var(--gold);
+  border: none;
+  color: #000;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.modal-box button:hover {
+  background: #f0d05a;
+}
