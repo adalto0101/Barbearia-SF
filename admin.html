@@ -9,34 +9,6 @@
 </head>
 <body>
 
-  <nav class="admin-nav">
-  <button id="btn-agendamentos" class="active">Agendamentos</button>
-  <button id="btn-servicos">Serviços</button>
-</nav>
-
-<!-- Conteúdo de Agendamentos -->
-<section id="sec-agendamentos">
-  <h2>📅 Agendamentos</h2>
-  <div id="lista-agendamentos"></div>
-</section>
-
-<!-- Conteúdo de Serviços -->
-<section id="sec-servicos" style="display:none;">
-  <h2>💈 Serviços</h2>
-
-  <form id="form-servico" class="form-servico">
-    <input type="text" id="serv-nome" placeholder="Nome do serviço" required>
-    <input type="number" id="serv-preco" placeholder="Preço (R$)" required>
-    <input type="number" id="serv-duracao" placeholder="Duração (min)" required>
-    <input type="time" id="serv-inicio" value="09:00" required>
-    <input type="time" id="serv-fim" value="18:00" required>
-    <button type="submit" class="btn-save">Salvar Serviço</button>
-  </form>
-
-  <div id="lista-servicos"></div>
-</section>
-
-
   <div id="login-section" class="login-container">
     <h1 class="titulo">Barbearia SF</h1>
     <p class="subtitulo">Painel do Barbeiro</p>
@@ -55,15 +27,34 @@
 
   <div id="admin-section" class="admin-container" style="display:none;">
     <header>
-      <h1>Painel de Agendamentos</h1>
+      <h1>Painel Administrativo</h1>
       <button id="logout" class="btn-logout">Sair</button>
     </header>
 
-    <section id="lista-agendamentos" class="lista"></section>
+    <nav class="admin-nav">
+      <button id="btn-agendamentos" class="active">Agendamentos</button>
+      <button id="btn-servicos">Serviços</button>
+    </nav>
+
+    <section id="sec-agendamentos">
+      <h2>📅 Agendamentos</h2>
+      <div id="lista-agendamentos" class="lista"></div>
+    </section>
+
+    <section id="sec-servicos" style="display:none;">
+      <h2>💈 Serviços</h2>
+
+      <form id="form-servico" class="form-servico">
+        <input type="text" id="serv-nome" placeholder="Nome do serviço" required>
+        <input type="number" id="serv-preco" placeholder="Preço (R$)" required>
+        <input type="number" id="serv-duracao" placeholder="Duração (min)" required>
+        <button type="submit" class="btn-save">Salvar Serviço</button>
+      </form>
+
+      <div id="lista-servicos" class="lista"></div>
+    </section>
   </div>
   
-  <script type="module" src="js/auth.js"></script>
   <script type="module" src="js/admin.js"></script>
-
 </body>
 </html>
