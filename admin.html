@@ -16,13 +16,10 @@
     <form id="login-form" class="login-box">
       <label for="email">E-mail</label>
       <input type="email" id="email" placeholder="admin@gmail.com" required>
-
       <label for="senha">Senha</label>
-      <div style="position: relative; display: flex; align-items: center;">
-        <input type="password" id="senha" placeholder="••••••••" required style="padding-right: 40px;">
-        <span id="toggle-senha" style="position: absolute; right: 10px; cursor: pointer; color: var(--dourado); font-size: 1.2rem;">
-          👁️
-        </span>
+      <div class="senha-wrapper">
+        <input type="password" id="senha" placeholder="••••••••" required>
+        <span id="toggle-senha">👁️</span>
       </div>
 
       <button type="submit" class="btn-login">Entrar</button>
@@ -63,5 +60,6 @@
   <script type="module" src="js/admin.js"></script>
 </body>
 </html>
+
 
 
