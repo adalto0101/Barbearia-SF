@@ -1,8 +1,8 @@
 // Importa módulos Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-import { getDatabase, ref, onValue, remove,update, push } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
+import { getDatabase, ref, onValue, remove, update, push } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
 
-// Configuração Firebase
+// Configuração Firebase (Sua configuração original)
 const firebaseConfig = {
   apiKey: "AIzaSyB-f47rzgtMlM-LQbVZt7TnPQhoYZadBQ4",
   authDomain: "barbearia-sf.firebaseapp.com",
@@ -17,32 +17,32 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-const lista = document.getElementById("lista-agendamentos");
+// Elementos DOM
+const listaAgendamentos = document.getElementById("lista-agendamentos");
+const listaServicos = document.getElementById("lista-servicos");
+const formServico = document.getElementById('form-servico');
 
-// Função para renderizar lista de agendamentos
+// --- 1️⃣ CARREGAR AGENDAMENTOS ---
 function carregarAgendamentos() {
   onValue(ref(db, "agendamentos"), (snapshot) => {
-    lista.innerHTML = "";
+    listaAgendamentos.innerHTML = "";
     const data = snapshot.val();
 
     if (data) {
       const itens = Object.entries(data)
-        .filter(([, ag]) => ag.data && ag.hora && ag.cliente) // só pega completos
+        .filter(([, ag]) => ag.data && ag.hora && ag.cliente)
         .sort(([, a], [, b]) => a.data.localeCompare(b.data));
-
 
       itens.forEach(([id, ag]) => {
         const dataBR = ag.data.split("-").reverse().join("/");
-        const msg = encodeURIComponent(
-          `Olá ${ag.cliente}, confirmamos seu agendamento na Barbearia SF para o dia ${dataBR} às ${ag.hora}.`
-        );
+        const msg = encodeURIComponent(`Olá ${ag.cliente}, confirmamos seu agendamento na Barbearia SF para o dia ${dataBR} às ${ag.hora}.`);
         const urlWhats = `https://wa.me/55${ag.whatsapp}?text=${msg}`;
 
         const card = document.createElement("div");
         card.classList.add("admin-card");
         card.innerHTML = `
           <div>
-            <strong>${ag.hora}</strong> - ${ag.cliente}<br>
+            <strong>${ag.hora} — ${ag.cliente}</strong><br>
             <small>${dataBR} • ${ag.servico}</small>
           </div>
           <div class="btns-card">
@@ -52,60 +52,32 @@ function carregarAgendamentos() {
           </div>
         `;
 
-        // --- EXCLUIR AGENDAMENTO ---
+        // Ações Agendamento
         card.querySelector(".btn-delete").onclick = () => {
           if (confirm(`Excluir agendamento de ${ag.cliente}?`)) {
-            remove(ref(db, `agendamentos/${id}`))
-              .then(() => alert("🗑️ Agendamento excluído com sucesso."))
-              .catch((err) => alert("Erro ao excluir: " + err.message));
+            remove(ref(db, `agendamentos/${id}`));
           }
         };
 
-        // --- EDITAR AGENDAMENTO ---
         card.querySelector(".btn-edit").onclick = () => {
-          const novoServico = prompt("Novo serviço:", ag.servico);
           const novaHora = prompt("Novo horário:", ag.hora);
-          if (novoServico && novaHora) {
-            update(ref(db, `agendamentos/${id}`), {
-              servico: novoServico,
-              hora: novaHora,
-            })
-              .then(() => alert("✅ Agendamento atualizado!"))
-              .catch((err) => alert("Erro ao atualizar: " + err.message));
+          if (novaHora) {
+            update(ref(db, `agendamentos/${id}`), { hora: novaHora });
           }
         };
 
-        lista.appendChild(card);
+        listaAgendamentos.appendChild(card);
       });
     } else {
-      lista.innerHTML = "<p>Nenhum agendamento encontrado.</p>";
+      listaAgendamentos.innerHTML = "<p style='text-align:center; opacity:0.6;'>Nenhum agendamento encontrado.</p>";
     }
   });
 }
 
-// --- TROCANDO ABAS ---
-const secAg = document.getElementById('sec-agendamentos');
-const secServ = document.getElementById('sec-servicos');
-document.getElementById('btn-agendamentos').onclick = () => {
-  secAg.style.display = 'block';
-  secServ.style.display = 'none';
-  document.getElementById('btn-agendamentos').classList.add('active');
-  document.getElementById('btn-servicos').classList.remove('active');
-};
-document.getElementById('btn-servicos').onclick = () => {
-  secAg.style.display = 'none';
-  secServ.style.display = 'block';
-  document.getElementById('btn-servicos').classList.add('active');
-  document.getElementById('btn-agendamentos').classList.remove('active');
-};
-
-// --- CRUD DE SERVIÇOS ---
-const formServ = document.getElementById('form-servico');
-const listaServ = document.getElementById('lista-servicos');
-
+// --- 2️⃣ CARREGAR SERVIÇOS ---
 function carregarServicos() {
   onValue(ref(db, "servicos"), (snapshot) => {
-    listaServ.innerHTML = "";
+    listaServicos.innerHTML = "";
     const data = snapshot.val();
     if (data) {
       Object.entries(data).forEach(([id, s]) => {
@@ -113,54 +85,80 @@ function carregarServicos() {
         card.classList.add('servico-card');
         card.innerHTML = `
           <div>
-            <strong>${s.nome}</strong><br>
-            <small>R$ ${s.preco} | ${s.duracao}min</small><br>
-            <small>${s.inicio} às ${s.fim}</small>
-          </div>
-          <div>
-            <button class="btn-edit-serv">✏️</button>
-            <button class="btn-del-serv">🗑️</button>
-          </div>
-        `;
+              <strong>${s.nome}</strong><br>
+              <small>R$ ${s.preco} | ${s.duracao}min</small>
+            </div>
+            <div class="btns-card">
+              <button class="btn-edit-serv">✏️</button>
+              <button class="btn-del-serv">🗑️</button>
+            </div> 
+             `;
 
         card.querySelector('.btn-del-serv').onclick = () => {
-          if (confirm(`Excluir serviço ${s.nome}?`))
-            remove(ref(db, `servicos/${id}`));
+          if (confirm(`Excluir serviço ${s.nome}?`)) remove(ref(db, `servicos/${id}`));
         };
 
         card.querySelector('.btn-edit-serv').onclick = () => {
           const novoPreco = prompt("Novo preço (R$):", s.preco);
-          const novaDuracao = prompt("Nova duração (min):", s.duracao);
-          if (novoPreco && novaDuracao) {
-            update(ref(db, `servicos/${id}`), {
-              preco: novoPreco,
-              duracao: novaDuracao
-            });
-          }
+          if (novoPreco) update(ref(db, `servicos/${id}`), { preco: novoPreco });
         };
 
-        listaServ.appendChild(card);
+        listaServicos.appendChild(card);
       });
     } else {
-      listaServ.innerHTML = "<p>Nenhum serviço cadastrado.</p>";
+      listaServicos.innerHTML = "<p style='text-align:center; opacity:0.6;'>Nenhum serviço cadastrado.</p>";
     }
   });
 }
 
-if (listaServ) carregarServicos();
+// --- 3️⃣ CONTROLE DE ABAS ---
+const secAg = document.getElementById('sec-agendamentos');
+const secServ = document.getElementById('sec-servicos');
+const btnTabAg = document.getElementById('btn-agendamentos');
+const btnTabServ = document.getElementById('btn-servicos');
 
-formServ.onsubmit = (e) => {
+btnTabAg.onclick = () => {
+  secAg.style.display = 'block';
+  secServ.style.display = 'none';
+  btnTabAg.classList.add('active');
+  btnTabServ.classList.remove('active');
+};
+
+btnTabServ.onclick = () => {
+  secAg.style.display = 'none';
+  secServ.style.display = 'block';
+  btnTabServ.classList.add('active');
+  btnTabAg.classList.remove('active');
+};
+
+
+// --- 4️⃣ CADASTRO DE SERVIÇOS ---
+formServico.onsubmit = (e) => {
   e.preventDefault();
   const nome = document.getElementById('serv-nome').value.trim();
   const preco = document.getElementById('serv-preco').value.trim();
   const duracao = document.getElementById('serv-duracao').value.trim();
-  const inicio = document.getElementById('serv-inicio').value;
-  const fim = document.getElementById('serv-fim').value;
-  if (!nome || !preco || !duracao) return alert("Preencha todos os campos!");
-  push(ref(db, 'servicos'), { nome, preco, duracao, inicio, fim })
-    .then(() => formServ.reset());
+
+  // Agora salvamos apenas o necessário
+  push(ref(db, 'servicos'), { 
+    nome, 
+    preco: Number(preco), 
+    duracao: Number(duracao)
+  }).then(() => {
+    formServico.reset();
+    alert("✅ Serviço cadastrado!");
+  });
 };
 
+// --- 5️⃣ INICIALIZAÇÃO ---
+// Lógica de Login simples para alternar as telas
+document.getElementById('login-form').onsubmit = (e) => {
+  e.preventDefault();
+  document.getElementById('login-section').style.display = 'none';
+  document.getElementById('admin-section').style.display = 'block';
+  carregarAgendamentos();
+  carregarServicos();
+};
 
-// Chama ao carregar
-if (lista) carregarAgendamentos();
+// Caso você use o Firebase Auth no auth.js, ele cuidará do redirecionamento.
+// Se não, o submit acima garante a troca visual para você testar agora.
