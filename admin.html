@@ -18,7 +18,12 @@
       <input type="email" id="email" placeholder="admin@gmail.com" required>
 
       <label for="senha">Senha</label>
-      <input type="password" id="senha" placeholder="••••••••" required>
+      <div style="position: relative; display: flex; align-items: center;">
+        <input type="password" id="senha" placeholder="••••••••" required style="padding-right: 40px;">
+        <span id="toggle-senha" style="position: absolute; right: 10px; cursor: pointer; color: var(--dourado); font-size: 1.2rem;">
+          👁️
+        </span>
+      </div>
 
       <button type="submit" class="btn-login">Entrar</button>
       <p id="erro-login" class="erro"></p>
@@ -58,3 +63,4 @@
   <script type="module" src="js/admin.js"></script>
 </body>
 </html>
+
