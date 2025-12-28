@@ -1,12 +1,16 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Painel do Barbeiro - Barbearia SF</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500&family=Cinzel+Decorative:wght@700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500&family=Cinzel+Decorative:wght@700&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="css/admin.css">
 </head>
+
 <body>
 
   <div id="login-section" class="login-container" style="display:none;">
@@ -54,18 +58,16 @@
         <input type="text" id="serv-nome" placeholder="Nome do serviço" required>
         <input type="number" id="serv-preco" placeholder="Preço (R$)" required>
         <input type="number" id="serv-duracao" placeholder="Duração (min)" required>
+        <input type="number" id="serv-ordem" placeholder="Ordem (Ex: 1)" required>
         <button type="submit" class="btn-save">Salvar Serviço</button>
       </form>
 
       <div id="lista-servicos" class="lista"></div>
     </section>
   </div>
+
   <script type="module" src="js/auth.js"></script>
   <script type="module" src="js/admin.js"></script>
 </body>
+
 </html>
-
-
-
-
-
