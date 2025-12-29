@@ -26,7 +26,7 @@ const toggleSenha = document.getElementById("toggle-senha");
 const senhaInput = document.getElementById("senha");
 
 // --- FUNÇÃO OLHO (MOSTRAR SENHA) ---
-if (toggleSenha) {
+if (toggleSenha && senhaInput) {
   toggleSenha.addEventListener("click", () => {
     const type = senhaInput.getAttribute("type") === "password" ? "text" : "password";
     senhaInput.setAttribute("type", type);
@@ -42,8 +42,10 @@ if (loginForm) {
     const senha = document.getElementById("senha").value;
     const btn = loginForm.querySelector('button');
 
-    btn.innerText = "Carregando...";
-    btn.disabled = true;
+    if (btn) {
+      btn.innerText = "Carregando...";
+      btn.disabled = true;
+    }
 
     signInWithEmailAndPassword(auth, email, senha)
       .then(() => {
@@ -54,8 +56,10 @@ if (loginForm) {
         if (erroLogin) erroLogin.textContent = "❌ E-mail ou senha inválidos.";
       })
       .finally(() => {
-        btn.innerText = "Entrar";
-        btn.disabled = false;
+        if (btn) {
+          btn.innerText = "Entrar";
+          btn.disabled = false;
+        }
       });
   });
 }
@@ -63,7 +67,7 @@ if (loginForm) {
 // --- OBSERVADOR DE AUTENTICAÇÃO (PERSISTÊNCIA) ---
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    // Verificações adicionadas para evitar o erro de null no GitHub Pages
+    // Proteção para evitar o erro de null no GitHub Pages
     if (loginSection) loginSection.style.display = "none";
     if (adminSection) adminSection.style.display = "block";
     
@@ -75,13 +79,13 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
-// --- LOGOUT (FIX) ---
+// --- LOGOUT (CORREÇÃO DA LINHA 73) ---
 if (logoutBtn) {
   logoutBtn.onclick = (e) => {
     e.preventDefault();
     signOut(auth).then(() => {
       alert("Sessão encerrada.");
-      window.location.reload(); // Recarrega para limpar tudo
+      window.location.reload(); 
     }).catch((error) => {
       console.error("Erro ao sair:", error);
     });
