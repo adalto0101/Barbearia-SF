@@ -164,6 +164,26 @@ btnAgendar.onclick = async () => {
     hora: horaSelecionada
   }).toString();
 
+  // Make
+const urlWebhook = "https://hook.us2.make.com/4ges1wr9mnexdxs72r7ijv6u6cevq2io"; 
+
+const dadosParaRobo = {
+    cliente: nome,
+    whatsapp: whatsapp,
+    servico: servicoSelecionado.nome,
+    data: data.split('-').reverse().join('/'), // Formato DD/MM/AAAA
+    hora: horaSelecionada
+};
+
+// Envia os dados para o Make
+fetch(urlWebhook, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(dadosParaRobo)
+})
+.then(() => console.log("Dados enviados ao robô com sucesso!"))
+.catch(err => console.error("Erro ao avisar o robô:", err));
+  
   // 3. Redireciona para a nova página levando os dados na URL
   window.location.href = `confirmacao.html?${parametros}`;
 };
