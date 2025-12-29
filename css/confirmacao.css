@@ -1,0 +1,112 @@
+:root {
+    --preto: #0d0d0d;
+    --cinza: #1a1a1a;
+    --dourado: #d4af37;
+    --branco: #f5f5f5;
+    --verde: #2ecc71;
+}
+
+body {
+    background: linear-gradient(rgba(255, 255, 255, 0.001), rgba(255, 255, 255, 0.001)),
+        url('https://images.unsplash.com/photo-1503951914875-452162b0f3f1?q=80&w=2070&auto=format&fit=crop');
+    background-size: cover;
+    background-position: center;
+    color: var(--branco);
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+}
+
+.confirm-container {
+    background: rgba(13, 13, 13, 0.95);
+    border: 1px solid var(--dourado);
+    max-width: 500px;
+    padding: 40px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+    animation: fadeInUp 0.8s ease-out;
+}
+
+.icon-check {
+    font-size: 3rem;
+    color: var(--verde);
+    margin-bottom: 15px;
+}
+
+.titulo {
+    font-family: 'Cinzel Decorative', serif;
+    color: var(--dourado);
+    font-size: 2rem;
+}
+
+.divisor {
+    border: 0;
+    border-top: 1px solid rgba(212, 175, 55, 0.3);
+    margin: 25px 0;
+}
+
+h3 {
+    color: var(--dourado);
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+}
+
+section {
+    margin-bottom: 30px;
+    text-align: left;
+}
+
+ul {
+    padding-left: 20px;
+    list-style-type: none;
+}
+
+ul li::before {
+    content: "•";
+    color: var(--dourado);
+    display: inline-block;
+    width: 1em;
+    margin-left: -1em;
+}
+
+.btn-novo-agendamento {
+    background: var(--dourado);
+    color: var(--preto);
+    border: none;
+    padding: 12px 25px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: 0.3s;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.btn-novo-agendamento:hover {
+    filter: brightness(1.2);
+    transform: translateY(-2px);
+}
+
+footer {
+    margin-top: 20px;
+    font-size: 0.8rem;
+    opacity: 0.5;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
