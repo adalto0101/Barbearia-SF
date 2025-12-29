@@ -142,7 +142,9 @@ btnAgendar.onclick = async () => {
     alert("⚠️ Preencha tudo!");
     return;
   }
- await push(ref(db, 'agendamentos'), {
+
+  // 1. Salva no Banco de Dados
+  await push(ref(db, 'agendamentos'), {
     cliente: nome,
     whatsapp,
     servico: servicoSelecionado.nome,
@@ -151,5 +153,17 @@ btnAgendar.onclick = async () => {
     duracao: Number(servicoSelecionado.duracao),
     timestamp: Date.now()
   });
-  window.location.href = 'confirmacao.html';
+
+  // 2. Prepara os dados para exibir na página de confirmação
+  // Transforma a data de AAAA-MM-DD para DD/MM/AAAA
+  const dataFormatada = data.split('-').reverse().join('/');
+
+  const parametros = new URLSearchParams({
+    servico: servicoSelecionado.nome,
+    data: dataFormatada,
+    hora: horaSelecionada
+  }).toString();
+
+  // 3. Redireciona para a nova página levando os dados na URL
+  window.location.href = `confirmacao.html?${parametros}`;
 };
