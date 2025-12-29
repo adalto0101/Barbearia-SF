@@ -104,3 +104,68 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     justify-content: center;
     align-items: center;
 }
+
+/* --- DEFINIÇÃO DAS ANIMAÇÕES --- */
+
+/* Fade de baixo para cima (mais elegante) */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Fade simples */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* --- APLICAÇÃO NAS SEÇÕES --- */
+
+/* Faz o container principal aparecer suavemente ao abrir a página */
+.admin-container {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* Faz os cards de agendamento e resultados aparecerem com fade quando surgirem */
+.admin-card,
+.resultado-card {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Classe utilitária para aplicar via JavaScript se necessário */
+.efeito-fade {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.btn-save,
+.btn-delete,
+.btn-logout,
+input[type="date"] {
+    transition: all 0.3s ease;
+    /* Faz qualquer mudança levar 0.3 segundos */
+}
+
+.btn-save:hover {
+    transform: scale(1.02);
+    /* Aumenta levemente */
+    box-shadow: 0 0 15px rgba(46, 204, 113, 0.4);
+    /* Brilha verde */
+}
+
+.btn-delete:hover {
+    transform: scale(1.02);
+    box-shadow: 0 0 15px rgba(230, 57, 70, 0.4);
+    /* Brilha vermelho */
+}
