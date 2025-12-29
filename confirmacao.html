@@ -1,43 +1,81 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agendamento Confirmado - Barbearia SF</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&family=Cinzel+Decorative:wght@700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&family=Cinzel+Decorative:wght@700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="css/confirmacao.css">
 </head>
+
 <body>
+
     <div class="confirm-container">
-        <div class="icon-check">✔️</div>
-        <h1 class="titulo">Tudo Pronto!</h1>
-        <p class="subtitulo">Seu horário foi reservado com sucesso.</p>
+        <div class="header-sucesso">
+            <div class="icon-check">✔️</div>
+            <h1 class="titulo">Tudo Pronto!</h1>
+            <p class="subtitulo">Seu horário foi reservado com sucesso.</p>
+        </div>
+
+        <div class="resumo-box">
+            <h3>Detalhes da Reserva:</h3>
+            <div class="resumo-item">
+                <span>Serviço:</span>
+                <strong id="res-servico">Carregando...</strong>
+            </div>
+            <div class="resumo-item">
+                <span>Data:</span>
+                <strong id="res-data">--/--/----</strong>
+            </div>
+            <div class="resumo-item">
+                <span>Horário:</span>
+                <strong id="res-hora">--:--</strong>
+            </div>
+        </div>
 
         <hr class="divisor">
 
-        <section class="regras">
-            <h3>📌 Informações Importantes</h3>
+        <section class="info-section">
+            <h3>📌 Lembretes Importantes</h3>
             <ul>
-                <li>Chegue com <strong>15 minutos de antecedência</strong> para garantir seu horário.</li>
-                <li>Atrasos superiores a 10 minutos podem resultar no cancelamento.</li>
-                <li>Ambiente climatizado, com som ambiente e wi-fi gratuito.</li>
+                <li>Chegue com <strong>15 minutos de antecedência</strong>.</li>
+                <li>Evite atrasos para não comprometer os próximos clientes.</li>
+                <li>Ambiente climatizado com Wi-Fi e música de qualidade.</li>
             </ul>
         </section>
 
-        <section class="experiencia">
+        <section class="info-section highlight">
             <h3>🍻 Enquanto Espera...</h3>
-            <p>Aproveite nosso bar com <strong>cerveja gelada, refrigerantes e água</strong>. Também temos uma linha exclusiva de <strong>pomadas e produtos capilares</strong> para manter seu visual em casa!</p>
+            <p>Aproveite nosso bar com cerveja gelada, refrigerantes e água. <strong>Também temos uma linha exclusiva de pomadas e  produtos capilares para manter seu visual em casa!</strong></p>
         </section>
 
         <section class="fidelidade">
-            <h3>🔄 Já quer garantir o retorno?</h3>
-            <p>Para não perder sua preferência de horário, você pode agendar seu próximo corte agora mesmo!</p>
-            <button onclick="window.location.href='index.html'" class="btn-novo-agendamento">Agendar Retorno</button>
+            <h3>🔄 Quer garantir a preferência?</h3>
+            <p>Você já pode deixar agendado seu próximo retorno para não perder seu horário favorito!</p>
+            <button onclick="window.location.href='index.html'" class="btn-retorno">Agendar Próximo Corte</button>
         </section>
 
         <footer>
             <p>Barbearia SF — Estilo e Tradição</p>
         </footer>
     </div>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+
+            const servico = urlParams.get('servico');
+            const data = urlParams.get('data');
+            const hora = urlParams.get('hora');
+
+            if (servico) document.getElementById('res-servico').innerText = servico;
+            if (data) document.getElementById('res-data').innerText = data;
+            if (hora) document.getElementById('res-hora').innerText = hora;
+        });
+    </script>
 </body>
+
 </html>
