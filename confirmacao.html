@@ -9,6 +9,29 @@
         href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&family=Cinzel+Decorative:wght@700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="css/confirmacao.css">
+    <style>
+        /* Estilo para separar múltiplos agendamentos dentro da mesma box */
+        .agendamento-confirmado {
+            border-bottom: 1px dashed rgba(212, 175, 55, 0.3);
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+
+        .agendamento-confirmado:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .cliente-badge {
+            display: block;
+            color: #d4af37;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+    </style>
 </head>
 
 <body>
@@ -20,19 +43,10 @@
             <p class="subtitulo">Seu horário foi reservado com sucesso.</p>
         </div>
 
-        <div class="resumo-box">
+        <div class="resumo-box" id="resumo-dinamico">
             <h3>Detalhes da Reserva:</h3>
-            <div class="resumo-item">
-                <span>Serviço:</span>
-                <strong id="res-servico">Carregando...</strong>
-            </div>
-            <div class="resumo-item">
-                <span>Data:</span>
-                <strong id="res-data">--/--/----</strong>
-            </div>
-            <div class="resumo-item">
-                <span>Horário:</span>
-                <strong id="res-hora">--:--</strong>
+            <div id="container-lista">
+                <p>Carregando detalhes...</p>
             </div>
         </div>
 
@@ -49,7 +63,8 @@
 
         <section class="info-section highlight">
             <h3>🍻 Enquanto Espera...</h3>
-            <p>Aproveite nosso bar com cerveja gelada, refrigerantes e água. <strong>Também temos uma linha exclusiva de pomadas e  produtos capilares para manter seu visual em casa!</strong></p>
+            <p>Aproveite nosso bar com cerveja gelada, refrigerantes e água. <strong>Também temos uma linha exclusiva de
+                    pomadas e produtos capilares para manter seu visual em casa!</strong></p>
         </section>
 
         <section class="fidelidade">
@@ -65,15 +80,39 @@
 
     <script>
         window.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
+            // Lendo a lista completa salva no localStorage pelo app.js
+            const dados = localStorage.getItem('listaAgendamentos');
+            const container = document.getElementById('container-lista');
 
-            const servico = urlParams.get('servico');
-            const data = urlParams.get('data');
-            const hora = urlParams.get('hora');
+            if (dados) {
+                const agendamentos = JSON.parse(dados);
+                container.innerHTML = ""; // Limpa o carregando
 
-            if (servico) document.getElementById('res-servico').innerText = servico;
-            if (data) document.getElementById('res-data').innerText = data;
-            if (hora) document.getElementById('res-hora').innerText = hora;
+                agendamentos.forEach((ag, index) => {
+                    const label = agendamentos.length > 1 ? `Agendamento ${index + 1}` : "Confirmado";
+
+                    const htmlAg = `
+                        <div class="agendamento-confirmado">
+                            <span class="cliente-badge">${label}: ${ag.cliente}</span>
+                            <div class="resumo-item">
+                                <span>Serviço:</span>
+                                <strong>${ag.servico}</strong>
+                            </div>
+                            <div class="resumo-item">
+                                <span>Data:</span>
+                                <strong>${ag.data}</strong>
+                            </div>
+                            <div class="resumo-item">
+                                <span>Horário:</span>
+                                <strong>${ag.hora}</strong>
+                            </div>
+                        </div>
+                    `;
+                    container.innerHTML += htmlAg;
+                });
+            } else {
+                container.innerHTML = "<p>Dados não encontrados. Por favor, fale com o barbeiro.</p>";
+            }
         });
     </script>
 </body>
