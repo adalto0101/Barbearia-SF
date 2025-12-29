@@ -143,47 +143,54 @@ btnAgendar.onclick = async () => {
     return;
   }
 
-  // 1. Salva no Banco de Dados
-  await push(ref(db, 'agendamentos'), {
-    cliente: nome,
-    whatsapp,
-    servico: servicoSelecionado.nome,
-    data,
-    hora: horaSelecionada,
-    duracao: Number(servicoSelecionado.duracao),
-    timestamp: Date.now()
-  });
+  // Desativa o botão para evitar cliques duplos
+  btnAgendar.disabled = true;
+  btnAgendar.innerText = "Processando...";
 
-  // 2. Prepara os dados para exibir na página de confirmação
-  // Transforma a data de AAAA-MM-DD para DD/MM/AAAA
-  const dataFormatada = data.split('-').reverse().join('/');
+  try {
+    // 1. Salva no Banco de Dados
+    await push(ref(db, 'agendamentos'), {
+      cliente: nome,
+      whatsapp,
+      servico: servicoSelecionado.nome,
+      data,
+      hora: horaSelecionada,
+      duracao: Number(servicoSelecionado.duracao),
+      timestamp: Date.now()
+    });
 
-  const parametros = new URLSearchParams({
-    servico: servicoSelecionado.nome,
-    data: dataFormatada,
-    hora: horaSelecionada
-  }).toString();
+    const dataFormatada = data.split('-').reverse().join('/');
 
-  // Make
-const urlWebhook = "https://hook.us2.make.com/4ges1wr9mnexdxs72r7ijv6u6cevq2io"; 
+    // 2. Prepara os dados para o Make
+    const urlWebhook = "https://hook.us2.make.com/4ges1wr9mnexdxs72r7ijv6u6cevq2io";
+    const dadosParaRobo = {
+      cliente: nome,
+      whatsapp: whatsapp,
+      servico: servicoSelecionado.nome,
+      data: dataFormatada,
+      hora: horaSelecionada
+    };
 
-const dadosParaRobo = {
-    cliente: nome,
-    whatsapp: whatsapp,
-    servico: servicoSelecionado.nome,
-    data: data.split('-').reverse().join('/'), // Formato DD/MM/AAAA
-    hora: horaSelecionada
-};
+    // 3. ENVIA PARA O MAKE E ESPERA A RESPOSTA (Ajuste crucial aqui)
+    await fetch(urlWebhook, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(dadosParaRobo)
+    });
 
-// Envia os dados para o Make
-fetch(urlWebhook, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(dadosParaRobo)
-})
-.then(() => console.log("Dados enviados ao robô com sucesso!"))
-.catch(err => console.error("Erro ao avisar o robô:", err));
-  
-  // 3. Redireciona para a nova página levando os dados na URL
-  window.location.href = `confirmacao.html?${parametros}`;
+    // 4. Redireciona APENAS após o fetch terminar
+    const parametros = new URLSearchParams({
+      servico: servicoSelecionado.nome,
+      data: dataFormatada,
+      hora: horaSelecionada
+    }).toString();
+
+    window.location.href = `confirmacao.html?${parametros}`;
+
+  } catch (err) {
+    console.error("Erro no agendamento:", err);
+    alert("Ocorreu um erro. Tente novamente.");
+    btnAgendar.disabled = false;
+    btnAgendar.innerText = "Agendar";
+  }
 };
