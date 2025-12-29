@@ -142,16 +142,6 @@ btnAgendar.onclick = async () => {
     alert("⚠️ Preencha tudo!");
     return;
   }
-
-  await push(ref(db, 'agendamentos'), {
-    cliente: nome, whatsapp, servico: servicoSelecionado.nome,
-    data, hora: horaSelecionada, duracao: Number(servicoSelecionado.duracao),
-    timestamp: Date.now()
-  });
-
-  document.getElementById('modal-sucesso').style.display = 'flex';
-  document.getElementById('fechar-modal').onclick = () => window.location.reload();
-
  await push(ref(db, 'agendamentos'), {
     cliente: nome,
     whatsapp,
@@ -161,8 +151,5 @@ btnAgendar.onclick = async () => {
     duracao: Number(servicoSelecionado.duracao),
     timestamp: Date.now()
   });
-
-
   window.location.href = 'confirmacao.html';
-
 };
