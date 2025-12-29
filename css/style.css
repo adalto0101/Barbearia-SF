@@ -1,11 +1,12 @@
 /* ------------------------------
-   ESTILO GERAL - BARBEARIA SF
+    ESTILO GERAL - BARBEARIA SF
 --------------------------------*/
 :root {
   --preto: #0d0d0d;
   --cinza: #2e2e2e;
   --dourado: #d4af37;
   --branco: #f5f5f5;
+  --vermelho: #c0392b;
 }
 
 * {
@@ -18,8 +19,8 @@
 body {
   min-height: 100vh;
   color: var(--branco);
-  background: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1)),
-              url('https://images.unsplash.com/photo-1585747860715-2ba37e788b70?q=80&w=2074&auto=format&fit=crop');
+  background: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1)),
+    url('https://images.unsplash.com/photo-1585747860715-2ba37e788b70?q=80&w=2074&auto=format&fit=crop');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -30,20 +31,19 @@ body {
   padding: 40px 15px;
 }
 
-/* Overlay opcional */
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.65);
+  background: rgba(0, 0, 0, 0.65);
   z-index: -1;
 }
 
-/* ------------------------------
-   CABEÇALHO
---------------------------------*/
+/* CABEÇALHO E BOTÕES DE TOPO */
 header {
   text-align: center;
   margin-bottom: 40px;
+  width: 100%;
+  max-width: 420px;
 }
 
 .titulo {
@@ -57,20 +57,49 @@ header {
   font-size: 1.2rem;
   color: var(--branco);
   opacity: 0.85;
+  margin-bottom: 15px;
 }
 
-/* ------------------------------
-   CONTAINER PRINCIPAL
---------------------------------*/
+.btn-secundario {
+  background: transparent;
+  border: 1px solid var(--dourado);
+  color: var(--dourado);
+  padding: 8px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: 0.3s;
+}
+
+.btn-secundario:hover {
+  background: var(--dourado);
+  color: var(--preto);
+}
+
+/* CONTAINER E BLOCOS */
 .container {
-  background: rgba(13,13,13,0.85);
-  border: 1px solid rgba(212,175,55,0.3);
+  background: rgba(13, 13, 13, 0.85);
+  border: 1px solid rgba(212, 175, 55, 0.3);
   border-radius: 10px;
   padding: 30px;
   width: 100%;
   max-width: 420px;
-  box-shadow: 0 0 20px rgba(0,0,0,0.5);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(8px);
+}
+
+.bloco-agendamento {
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+}
+
+.bloco-agendamento h3 {
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+  border-left: 3px solid var(--dourado);
+  padding-left: 10px;
+  text-align: left;
 }
 
 label {
@@ -80,66 +109,66 @@ label {
   color: var(--dourado);
 }
 
-input, select {
+input,
+select {
   width: 100%;
   margin-top: 5px;
   padding: 10px;
   border-radius: 5px;
   border: none;
   outline: none;
-  font-size: 1rem;
   background: var(--cinza);
   color: var(--branco);
 }
 
-input:focus, select:focus {
+input:focus,
+select:focus {
   border: 1px solid var(--dourado);
   background: #1a1a1a;
 }
 
-h3 {
-  color: var(--dourado);
-  text-align: center;
-  margin-top: 25px;
-}
-
-/* ------------------------------
-   HORÁRIOS / BOTÕES
---------------------------------*/
+/* HORÁRIOS / BOTÕES */
 .grid-horarios {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
   gap: 10px;
-  margin-top: 20px;
+  margin-top: 15px;
 }
 
-.time-slot, .horario {
+.horario {
   background: var(--cinza);
-  border: 1px solid rgba(212,175,55,0.3);
-  padding: 10px 0;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  padding: 8px 0;
   text-align: center;
   border-radius: 6px;
   cursor: pointer;
-  color: var(--branco);
-  transition: all 0.3s ease;
+  transition: 0.3s;
+  font-size: 0.9rem;
 }
 
-.time-slot:hover, .horario:hover {
-  background: var(--dourado);
-  color: var(--preto);
-}
-
-.time-slot.selected, .horario.active {
+.horario:hover,
+.horario.active {
   background: var(--dourado);
   color: var(--preto);
   font-weight: bold;
-  transform: scale(1.05);
 }
 
 .horario.indisponivel {
-  background: #333;
-  color: #777;
+  background: #222;
+  color: #555;
   cursor: not-allowed;
+  border-color: transparent;
+}
+
+.btn-extra {
+  background: transparent;
+  color: var(--branco);
+  border: 1px dashed var(--dourado);
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  cursor: pointer;
+  border-radius: 5px;
 }
 
 .btn-agendar {
@@ -153,46 +182,105 @@ h3 {
   font-size: 1.1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: 0.3s;
 }
 
 .btn-agendar:hover {
   background: #e0c157;
   transform: translateY(-2px);
-  box-shadow: 0 0 10px rgba(212,175,55,0.5);
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
 }
 
-/* ------------------------------
-   BOTÃO ADMIN (CADEADO)
---------------------------------*/
+/* MODAIS E GESTÃO */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  padding: 20px;
+}
+
+.modal-box {
+  background: #111;
+  border: 1px solid var(--dourado);
+  color: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  text-align: center;
+  width: 100%;
+  max-width: 400px;
+}
+
+.lista-gestao {
+  margin: 20px 0;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.item-gestao {
+  background: #1a1a1a;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  text-align: left;
+  border-left: 4px solid var(--dourado);
+}
+
+.acoes-gestao {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.btn-reagendar {
+  background: var(--dourado) !important;
+  color: var(--preto) !important;
+  flex: 1;
+  padding: 8px;
+  border-radius: 5px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-desistir {
+  background: var(--vermelho) !important;
+  color: white !important;
+  flex: 1;
+  padding: 8px;
+  border-radius: 5px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-reagendar:hover {
+  background: #e0c157 !important;
+}
+
+.btn-desistir:hover {
+  opacity: 0.8;
+}
+
+/* ADMIN E RESPONSIVIDADE */
 .btn-admin {
   position: fixed;
   bottom: 20px;
   right: 20px;
-  background: rgba(0,0,0,0.7);
+  background: rgba(0, 0, 0, 0.7);
   color: var(--dourado);
   padding: 10px 13px;
-  font-size: 1.2rem;
   border-radius: 50%;
   text-decoration: none;
-  box-shadow: 0 0 8px rgba(0,0,0,0.6);
-  transition: all 0.3s;
+  transition: 0.3s;
 }
 
-.btn-admin:hover {
-  background: var(--dourado);
-  color: var(--preto);
-  transform: scale(1.1);
-}
-
-/* ------------------------------
-   RESPONSIVIDADE
---------------------------------*/
 @media (max-width: 768px) {
-  body {
-    padding: 20px 10px;
-  }
-
   .titulo {
     font-size: 2.2rem;
   }
@@ -202,59 +290,53 @@ h3 {
   }
 
   .grid-horarios {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
-@media (max-width: 480px) {
-  .titulo {
-    font-size: 1.8rem;
-  }
-
-  .btn-admin {
-    bottom: 15px;
-    right: 15px;
-    padding: 8px 10px;
-  }
-}
-
-/* ------------------------------
-   MODAL PERSONALIZADO
---------------------------------*/
-.modal-overlay {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0, 0, 0, 0.8);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 999;
-}
-
-.modal-box {
-  background: #111;
-  border: 1px solid var(--gold);
-  color: #fff;
-  padding: 30px;
-  border-radius: 10px;
-  text-align: center;
-  width: 90%;
-  max-width: 400px;
-  box-shadow: 0 0 20px rgba(0,0,0,0.5);
-}
-
-.modal-box button {
-  margin-top: 20px;
-  background: var(--gold);
+/* Estilo para os botões Buscar e Sair dentro do Modal */
+#btn-buscar-gestao,
+.btn-fechar-modal {
+  width: 100%;
+  padding: 12px;
+  margin-top: 15px;
+  background: var(--dourado);
+  color: var(--preto);
   border: none;
-  color: #000;
-  padding: 10px 20px;
-  border-radius: 5px;
-  font-weight: bold;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 1rem;
   cursor: pointer;
+  transition: 0.3s;
 }
 
-.modal-box button:hover {
-  background: #f0d05a;
+#btn-buscar-gestao:hover,
+.btn-fechar-modal:hover {
+  background: #e0c157;
+  transform: translateY(-2px);
+}
+
+/* Estilo específico para o botão Sair ser um pouco mais discreto se quiser */
+.btn-fechar-modal {
+  background: transparent;
+  border: 1px solid var(--dourado);
+  color: var(--dourado);
+  margin-top: 10px;
+}
+
+.btn-fechar-modal:hover {
+  background: rgba(212, 175, 55, 0.1);
+  color: var(--dourado);
+}
+
+/* Ajuste no input do modal para não ficar colado nos botões */
+#modal-gestao input {
+  margin-bottom: 5px;
+}
+
+/* Garante que o conteúdo do modal esteja empilhado corretamente */
+.modal-box {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
