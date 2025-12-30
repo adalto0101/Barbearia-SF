@@ -18,6 +18,7 @@ const db = getDatabase(app);
 const listaAgendamentos = document.getElementById("lista-agendamentos");
 const filtroData = document.getElementById("filtro-data");
 const buscaCliente = document.getElementById("pesquisa-cliente");
+const togglePassados = document.getElementById("toggle-passados"); // Adicionado para a chave
 const listaServicos = document.getElementById("lista-servicos");
 const formServico = document.getElementById('form-servico');
 const gradeBloqueio = document.getElementById('grade-bloqueio');
@@ -93,9 +94,13 @@ function carregarAgendamentos() {
           const matchesBusca = nomeAg.includes(termoBusca) || foneAg.includes(termoBusca);
 
           let matchesHorario = true;
-          if (dataAg === hojeISO) {
-            matchesHorario = minutosAg >= minutosAtuais;
+          // Início da alteração da chave
+          if (togglePassados && togglePassados.checked) {
+            if (dataAg === hojeISO) {
+              matchesHorario = minutosAg >= minutosAtuais;
+            }
           }
+          // Fim da alteração da chave
 
           return matchesData && matchesBusca && matchesHorario;
         })
@@ -113,14 +118,14 @@ function carregarAgendamentos() {
         card.className = `admin-card ${ag.cliente === "BLOQUEADO" ? "bloqueado" : ""}`;
 
         card.innerHTML = `
-          <div>
-            <strong>${ag.hora} — ${ag.cliente}</strong><br>
-            <small>${ag.servico || 'Bloqueio Manual'}</small>
-          </div>
-          <div class="btns-card">
-            ${ag.cliente !== "BLOQUEADO" ? `<a href="${urlWhats}" target="_blank" class="btn-whatsapp">WhatsApp</a>` : ''}
-            <button class="btn-delete">Excluir</button>
-          </div>`;
+          <div>
+            <strong>${ag.hora} — ${ag.cliente}</strong><br>
+            <small>${ag.servico || 'Bloqueio Manual'}</small>
+          </div>
+          <div class="btns-card">
+            ${ag.cliente !== "BLOQUEADO" ? `<a href="${urlWhats}" target="_blank" class="btn-whatsapp">WhatsApp</a>` : ''}
+            <button class="btn-delete">Excluir</button>
+          </div>`;
 
         card.querySelector(".btn-delete").onclick = () => {
           if (confirm(`Excluir agendamento de ${ag.cliente}?`)) remove(ref(db, `agendamentos/${id}`));
@@ -231,15 +236,15 @@ function carregarServicos() {
         const card = document.createElement('div');
         card.className = 'servico-card';
         card.innerHTML = `
-          <div>
-            <strong>${s.ordem || '?'}. ${s.nome}</strong><br>
-            <small>R$ ${s.preco} | ${s.duracao}min</small>
-          </div>
-          <div class="btns-card">
-            <button class="btn-edit-ordem" title="Mudar Posição">🔢</button>
-            <button class="btn-edit-serv" title="Editar Preço">💰</button>
-            <button class="btn-del-serv" title="Excluir">🗑️</button>
-          </div>`;
+          <div>
+            <strong>${s.ordem || '?'}. ${s.nome}</strong><br>
+            <small>R$ ${s.preco} | ${s.duracao}min</small>
+          </div>
+          <div class="btns-card">
+            <button class="btn-edit-ordem" title="Mudar Posição">🔢</button>
+            <button class="btn-edit-serv" title="Editar Preço">💰</button>
+            <button class="btn-del-serv" title="Excluir">🗑️</button>
+          </div>`;
 
         card.querySelector('.btn-del-serv').onclick = () => {
           if (confirm(`Excluir serviço ${s.nome}?`)) remove(ref(db, `servicos/${id}`));
@@ -299,6 +304,8 @@ if (filtroData) filtroData.onchange = () => {
 };
 
 if (buscaCliente) buscaCliente.oninput = carregarAgendamentos;
+
+if (togglePassados) togglePassados.onchange = carregarAgendamentos;
 
 // --- 8️⃣ INICIALIZAÇÃO ---
 window.addEventListener('auth-ready', () => {
