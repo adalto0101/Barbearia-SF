@@ -199,27 +199,24 @@ select:focus {
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(4px); /* Efeito de vidro opcional */
     display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 99999;
+    justify-content: center; /* Centraliza horizontal */
+    align-items: center;     /* Centraliza vertical */
+    z-index: 10000;
 }
 
 .modal-box {
     background: #1a1a1a;
     border: 1px solid #d4af37;
-    padding: 40px;
-    width: 350px;       /* Largura fixa para parecer um card */
-    min-height: 350px;  /* Altura mínima para ser quadrado */
+    padding: 30px;
+    width: 320px;        /* Largura fixa de card */
+    min-height: 320px;   /* Altura para ser quadrado */
+    border-radius: 15px;
+    text-align: center;
     display: flex;
     flex-direction: column;
-    align-items: center;
     justify-content: center;
-    text-align: center;
-    border-radius: 12px;
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
-    animation: popupSurgir 0.3s ease-out;
+    align-items: center;
 }
 
 @keyframes popupSurgir {
