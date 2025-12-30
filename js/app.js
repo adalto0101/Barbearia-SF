@@ -228,7 +228,7 @@ btnConfirmarTudo.onclick = async (e) => {
   mostrarFeedback();
 };
 
-// --- 5 SISTEMA DE GESTÃO (FINALIZADO E CORRIGIDO) ---
+// --- 5 SISTEMA DE GESTÃO (ABORDAGEM DE DELEGAÇÃO) ---
 
 btnAbrirGestao.onclick = () => {
     const mg = document.getElementById('modal-gestao');
@@ -249,29 +249,27 @@ btnBuscarGestao.onclick = () => {
                 const item = document.createElement('div');
                 item.className = 'item-gestao';
                 item.innerHTML = `
-          <p><strong>${ag.data.split('-').reverse().join('/')} às ${ag.hora}</strong><br>${ag.servico}</p>
-          <div class="acoes-gestao">
-            <button class="btn-reagendar" onclick="window.processarAcao('${id}', 'reagendar', '${ag.cliente}', '${ag.whatsapp}')">Reagendar</button>
-            <button class="btn-desistir" onclick="window.processarAcao('${id}', 'excluir')">Desistir</button>
-          </div>
-        `;
+                  <p><strong>${ag.data.split('-').reverse().join('/')} às ${ag.hora}</strong><br>${ag.servico}</p>
+                  <div class="acoes-gestao">
+                    <button class="btn-reagendar" onclick="window.processarAcao('${id}', 'reagendar', '${ag.cliente}', '${ag.whatsapp}')">Reagendar</button>
+                    <button class="btn-desistir" onclick="window.processarAcao('${id}', 'excluir')">Desistir</button>
+                  </div>
+                `;
                 resultado.appendChild(item);
             }
         });
     }, { onlyOnce: true });
 };
 
-// FUNÇÃO PARA PROCESSAR EXCLUSÃO/REAGENDAMENTO (SUBSTITUI O CONFIRM NATIVO)
+// FUNÇÃO GLOBAL DE PROCESSAMENTO
 window.processarAcao = (id, tipo, nome = '', whatsapp = '') => {
     const agRef = ref(db, `agendamentos/${id}`);
 
     remove(agRef).then(() => {
-        // Fecha o modal de lista de busca
         if (modalGestao) modalGestao.style.display = 'none';
 
         const mc = document.getElementById('modal-cancelamento');
         if (mc) {
-            // Seletores baseados nas imagens que você enviou
             const titulo = mc.querySelector('h2');
             const texto = mc.querySelector('p');
             const botao = document.getElementById('btn-reload-gestao');
@@ -279,39 +277,39 @@ window.processarAcao = (id, tipo, nome = '', whatsapp = '') => {
             if (tipo === 'excluir') {
                 if (titulo) titulo.innerText = "Atendimento Descartado";
                 if (texto) texto.innerHTML = "Seu agendamento foi excluído com sucesso. <br> Você pode se quiser, prosseguir criando um novo agendamento agora.";
-                if (botao) botao.innerText = "Novo Agendamento";
             } else {
-                // Preenche campos para Reagendar
+                // Reagendamento: preenche os inputs
                 const inputNome = document.querySelector('.cliente-nome');
                 const inputWhats = document.querySelector('.cliente-whatsapp');
                 if (inputNome) inputNome.value = nome;
                 if (inputWhats) inputWhats.value = whatsapp;
 
-                if (titulo) {
-                    titulo.innerText = "HORÁRIO LIBERADO";
-                    titulo.style.fontFamily = "'Cinzel Decorative', serif"; // Mantém o estilo da imagem
-                }
+                if (titulo) titulo.innerText = "HORÁRIO LIBERADO";
                 if (texto) texto.innerHTML = "O horário anterior foi removido com sucesso. <br> Escolha o seu novo horário agora.";
-                if (botao) botao.innerText = "NOVO AGENDAMENTO";
             }
             mc.style.display = 'flex';
         }
-    }).catch(err => console.error("Erro:", err));
+    }).catch(err => console.error("Erro Firebase:", err));
 };
 
-// --- 6 FIX DO BOTÃO "MORTO" (EVENT LISTENER DIRETO NO ID) ---
+// --- 6 ABORDAGEM DEFINITIVA PARA O BOTÃO (DELEGAÇÃO DE EVENTO) ---
 
-const btnReloadFinal = document.getElementById('btn-reload-gestao');
-
-if (btnReloadFinal) {
-    btnReloadFinal.addEventListener('click', () => {
-        const mc = document.getElementById('modal-cancelamento');
-        if (mc) mc.style.display = 'none'; // Fecha o card
+// Ouvimos o clique no documento inteiro
+document.addEventListener('click', (event) => {
+    // Verificamos se o clique foi no botão pelo ID ou pela CLASSE
+    if (event.target && (event.target.id === 'btn-reload-gestao' || event.target.classList.contains('btn-novo-agendamento'))) {
         
-        // Sobe para o topo para o novo agendamento
+        console.log("Botão clicado!"); // Para você testar no F12 se está funcionando
+        
+        const mc = document.getElementById('modal-cancelamento');
+        if (mc) {
+            mc.style.display = 'none'; // Fecha o card
+        }
+        
+        // Sobe para o topo suavemente
         window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-}
+    }
+});
 
 function mostrarFeedback() {
     window.location.href = "confirmacao.html";
