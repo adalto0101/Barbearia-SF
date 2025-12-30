@@ -228,7 +228,7 @@ btnConfirmarTudo.onclick = async (e) => {
   mostrarFeedback();
 };
 
-// --- 5 SISTEMA DE GESTÃO (PREMIUM - SEM POPUPS NATIVOS) ---
+// --- 5 SISTEMA DE GESTÃO (FINALIZADO E CORRIGIDO) ---
 
 btnAbrirGestao.onclick = () => {
     const mg = document.getElementById('modal-gestao');
@@ -261,54 +261,57 @@ btnBuscarGestao.onclick = () => {
     }, { onlyOnce: true });
 };
 
-// FUNÇÃO ÚNICA PARA PROCESSAR TUDO NO SEU CARD PERSONALIZADO
+// FUNÇÃO PARA PROCESSAR EXCLUSÃO/REAGENDAMENTO (SUBSTITUI O CONFIRM NATIVO)
 window.processarAcao = (id, tipo, nome = '', whatsapp = '') => {
     const agRef = ref(db, `agendamentos/${id}`);
 
     remove(agRef).then(() => {
         // Fecha o modal de lista de busca
-        const mg = document.getElementById('modal-gestao');
-        if (mg) mg.style.display = 'none';
+        if (modalGestao) modalGestao.style.display = 'none';
 
         const mc = document.getElementById('modal-cancelamento');
         if (mc) {
-            // Busca elementos com segurança (if checks) para evitar erros de null
+            // Seletores baseados nas imagens que você enviou
             const titulo = mc.querySelector('h2');
             const texto = mc.querySelector('p');
-            const botao = mc.querySelector('.btn-agendar');
+            const botao = document.getElementById('btn-reload-gestao');
 
             if (tipo === 'excluir') {
-                if (titulo) titulo.innerText = "Descartado";
-                if (texto) texto.innerHTML = "Seu agendamento foi excluído com sucesso. <br> O horário já está disponível.";
-                if (botao) botao.innerText = "NOVO AGENDAMENTO";
+                if (titulo) titulo.innerText = "Atendimento Descartado";
+                if (texto) texto.innerHTML = "Seu agendamento foi excluído com sucesso. <br> Você pode se quiser, prosseguir criando um novo agendamento agora.";
+                if (botao) botao.innerText = "Novo Agendamento";
             } else {
-                // Reagendar: Carrega dados de volta nos inputs
+                // Preenche campos para Reagendar
                 const inputNome = document.querySelector('.cliente-nome');
                 const inputWhats = document.querySelector('.cliente-whatsapp');
                 if (inputNome) inputNome.value = nome;
                 if (inputWhats) inputWhats.value = whatsapp;
 
-                if (titulo) titulo.innerText = "Horário Liberado";
+                if (titulo) {
+                    titulo.innerText = "HORÁRIO LIBERADO";
+                    titulo.style.fontFamily = "'Cinzel Decorative', serif"; // Mantém o estilo da imagem
+                }
                 if (texto) texto.innerHTML = "O horário anterior foi removido com sucesso. <br> Escolha o seu novo horário agora.";
-                if (botao) botao.innerText = "ESCOLHER NOVO HORÁRIO";
+                if (botao) botao.innerText = "NOVO AGENDAMENTO";
             }
             mc.style.display = 'flex';
         }
-    }).catch(err => console.error("Erro na operação:", err));
+    }).catch(err => console.error("Erro:", err));
 };
 
-// --- 6 FIX DE CLIQUES E REDIRECIONAMENTO ---
+// --- 6 FIX DO BOTÃO "MORTO" (EVENT LISTENER DIRETO NO ID) ---
 
-// Resolve o problema do botão "morto" no card (Módulo Fix)
-document.addEventListener('click', (e) => {
-    if (e.target && e.target.classList.contains('btn-agendar')) {
+const btnReloadFinal = document.getElementById('btn-reload-gestao');
+
+if (btnReloadFinal) {
+    btnReloadFinal.addEventListener('click', () => {
         const mc = document.getElementById('modal-cancelamento');
-        if (mc) mc.style.display = 'none';
+        if (mc) mc.style.display = 'none'; // Fecha o card
         
-        // Faz o scroll suave para o topo para o usuário agendar novamente
+        // Sobe para o topo para o novo agendamento
         window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-});
+    });
+}
 
 function mostrarFeedback() {
     window.location.href = "confirmacao.html";
