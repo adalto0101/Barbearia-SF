@@ -306,7 +306,7 @@ window.addEventListener('auth-ready', () => {
   carregarServicos();
 });
 
-// Atualização automática a cada 5 minutos
+// Atualização automática a cada 1 hora (3600000 ms)
 setInterval(() => {
   carregarAgendamentos();
-}, 300000);
+}, 3600000);
