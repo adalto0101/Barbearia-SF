@@ -228,7 +228,7 @@ btnConfirmarTudo.onclick = async (e) => {
   mostrarFeedback();
 };
 
-// --- 5 SISTEMA DE GESTÃO ---
+// --- 5 SISTEMA DE GESTÃO (ATUALIZADO) ---
 btnAbrirGestao.onclick = () => modalGestao.style.display = 'flex';
 
 btnBuscarGestao.onclick = () => {
@@ -257,23 +257,51 @@ btnBuscarGestao.onclick = () => {
   }, { onlyOnce: true });
 };
 
+// --- FUNÇÃO PARA EXCLUIR E MOSTRAR MODAL PERSONALIZADO ---
 window.excluirAg = (id) => {
   if (confirm("Deseja realmente cancelar este horário?")) {
-    remove(ref(db, `agendamentos/${id}`));
-    modalGestao.style.display = 'none';
-    mostrarFeedback("Cancelado!", "O horário foi liberado com sucesso.");
+    remove(ref(db, `agendamentos/${id}`)).then(() => {
+      // 1. Esconde o modal de busca/gestão
+      modalGestao.style.display = 'none';
+      
+      // 2. Exibe o novo modal de descarte personalizado (que está no seu HTML)
+      if (modalCancelamento) {
+        modalCancelamento.style.display = 'flex';
+      } else {
+        alert("Atendimento descartado com sucesso!");
+        location.reload();
+      }
+    }).catch(err => alert("Erro ao excluir: " + err));
   }
 };
 
+// --- FUNÇÃO PARA REAGENDAR (LIMPA E VOLTA PRO TOPO) ---
 window.reagendarAg = (id, nome, whatsapp) => {
-  if (confirm("Para reagendar, este horário será removido e você poderá escolher um novo. Deseja continuar?")) {
-    remove(ref(db, `agendamentos/${id}`));
-    document.querySelector('.cliente-nome').value = nome;
-    document.querySelector('.cliente-whatsapp').value = whatsapp;
-    modalGestao.style.display = 'none';
-    alert("Horário removido. Agora escolha a nova data e horário no formulário.");
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (confirm("Para reagendar, seu horário atual será cancelado e você escolherá um novo. Deseja continuar?")) {
+    remove(ref(db, `agendamentos/${id}`)).then(() => {
+      // Preenche os campos principais para o cliente não ter que digitar de novo
+      document.querySelector('.cliente-nome').value = nome;
+      document.querySelector('.cliente-whatsapp').value = whatsapp;
+      
+      // Fecha o modal de gestão
+      modalGestao.style.display = 'none';
+      
+      // Feedback amigável
+      alert("Horário antigo descartado. Escolha sua nova data e hora no formulário.");
+      
+      // Sobe a tela para o formulário
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
   }
+};
+
+// --- FUNÇÃO PARA FECHAR O MODAL DE CANCELAMENTO ---
+window.fecharModalCancelamento = function() {
+  if (modalCancelamento) {
+    modalCancelamento.style.display = 'none';
+  }
+  // Recarrega para limpar buscas antigas e estados
+  location.reload(); 
 };
 
 // --- 6 REDIRECIONAMENTO IMEDIATO ---
