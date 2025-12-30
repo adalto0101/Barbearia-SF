@@ -194,7 +194,7 @@ header h1 {
 .servico-card {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: left;
   background: var(--cinza);
   border: 1px solid rgba(212, 175, 55, 0.2);
   padding: 15px 20px;
