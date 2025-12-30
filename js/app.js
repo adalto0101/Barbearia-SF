@@ -229,79 +229,96 @@ btnConfirmarTudo.onclick = async (e) => {
 };
 
 // --- 5 SISTEMA DE GESTÃO (ATUALIZADO) ---
-btnAbrirGestao.onclick = () => modalGestao.style.display = 'flex';
+// --- 5 SISTEMA DE GESTÃO (CORRIGIDO) ---
+
+// Ao usar módulos, é mais seguro buscar o elemento no momento do clique
+btnAbrirGestao.onclick = () => {
+    const mg = document.getElementById('modal-gestao');
+    if (mg) mg.style.display = 'flex';
+};
 
 btnBuscarGestao.onclick = () => {
-  const tel = document.getElementById('busca-tel-gestao').value.replace(/\D/g, '');
-  if (!tel) return;
+    const tel = document.getElementById('busca-tel-gestao').value.replace(/\D/g, '');
+    if (!tel) return;
 
-  onValue(ref(db, 'agendamentos'), (snapshot) => {
-    const ags = snapshot.val() || {};
-    const resultado = document.getElementById('resultado-gestao');
-    resultado.innerHTML = "";
+    onValue(ref(db, 'agendamentos'), (snapshot) => {
+        const ags = snapshot.val() || {};
+        const resultado = document.getElementById('resultado-gestao');
+        resultado.innerHTML = "";
 
-    Object.entries(ags).forEach(([id, ag]) => {
-      if (ag.whatsapp === tel) {
-        const item = document.createElement('div');
-        item.className = 'item-gestao';
-        item.innerHTML = `
+        Object.entries(ags).forEach(([id, ag]) => {
+            if (ag.whatsapp === tel) {
+                const item = document.createElement('div');
+                item.className = 'item-gestao';
+                item.innerHTML = `
           <p><strong>${ag.data.split('-').reverse().join('/')} às ${ag.hora}</strong><br>${ag.servico}</p>
           <div class="acoes-gestao">
             <button class="btn-reagendar" onclick="window.reagendarAg('${id}', '${ag.cliente}', '${ag.whatsapp}')">Reagendar</button>
             <button class="btn-desistir" onclick="window.excluirAg('${id}')">Desistir</button>
           </div>
         `;
-        resultado.appendChild(item);
-      }
-    });
-  }, { onlyOnce: true });
+                resultado.appendChild(item);
+            }
+        });
+    }, { onlyOnce: true });
 };
 
 // --- FUNÇÃO PARA EXCLUIR E MOSTRAR MODAL PERSONALIZADO ---
 window.excluirAg = (id) => {
-  if (confirm("Deseja realmente cancelar este horário?")) {
-    remove(ref(db, `agendamentos/${id}`)).then(() => {
-      // 1. Esconde o modal de busca/gestão
-      modalGestao.style.display = 'none';
-      
-      // 2. Exibe o novo modal de descarte personalizado (que está no seu HTML)
-      if (modalCancelamento) {
-        modalCancelamento.style.display = 'flex';
-      } else {
-        alert("Atendimento descartado com sucesso!");
-        location.reload();
-      }
-    }).catch(err => alert("Erro ao excluir: " + err));
-  }
+    if (confirm("Deseja realmente cancelar este horário?")) {
+        const agRef = ref(db, `agendamentos/${id}`);
+
+        remove(agRef).then(() => {
+            // 1. Esconde o modal de busca/gestão buscando pelo ID na hora
+            const mg = document.getElementById('modal-gestao');
+            if (mg) mg.style.display = 'none';
+
+            // 2. Busca o modal de cancelamento pelo ID para evitar "is not defined"
+            const mc = document.getElementById('modal-cancelamento');
+            if (mc) {
+                mc.style.display = 'flex';
+            } else {
+                alert("Atendimento descartado com sucesso!");
+                location.reload();
+            }
+        }).catch(err => alert("Erro ao excluir: " + err));
+    }
 };
 
 // --- FUNÇÃO PARA REAGENDAR (LIMPA E VOLTA PRO TOPO) ---
 window.reagendarAg = (id, nome, whatsapp) => {
-  if (confirm("Para reagendar, seu horário atual será cancelado e você escolherá um novo. Deseja continuar?")) {
-    remove(ref(db, `agendamentos/${id}`)).then(() => {
-      // Preenche os campos principais para o cliente não ter que digitar de novo
-      document.querySelector('.cliente-nome').value = nome;
-      document.querySelector('.cliente-whatsapp').value = whatsapp;
-      
-      // Fecha o modal de gestão
-      modalGestao.style.display = 'none';
-      
-      // Feedback amigável
-      alert("Horário antigo descartado. Escolha sua nova data e hora no formulário.");
-      
-      // Sobe a tela para o formulário
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-  }
+    if (confirm("Para reagendar, seu horário atual será cancelado e você escolherá um novo. Deseja continuar?")) {
+        const agRef = ref(db, `agendamentos/${id}`);
+
+        remove(agRef).then(() => {
+            // Preenche os campos principais
+            const inputNome = document.querySelector('.cliente-nome');
+            const inputWhats = document.querySelector('.cliente-whatsapp');
+
+            if (inputNome) inputNome.value = nome;
+            if (inputWhats) inputWhats.value = whatsapp;
+
+            // Fecha o modal de gestão
+            const mg = document.getElementById('modal-gestao');
+            if (mg) mg.style.display = 'none';
+
+            // Feedback amigável
+            alert("Horário antigo descartado. Escolha sua nova data e hora no formulário.");
+
+            // Sobe a tela para o formulário
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
 };
 
 // --- FUNÇÃO PARA FECHAR O MODAL DE CANCELAMENTO ---
 window.fecharModalCancelamento = function() {
-  if (modalCancelamento) {
-    modalCancelamento.style.display = 'none';
-  }
-  // Recarrega para limpar buscas antigas e estados
-  location.reload(); 
+    const mc = document.getElementById('modal-cancelamento');
+    if (mc) {
+        mc.style.display = 'none';
+    }
+    // Recarrega para limpar buscas antigas e estados
+    location.reload();
 };
 
 // --- 6 REDIRECIONAMENTO IMEDIATO ---
