@@ -193,25 +193,57 @@ select:focus {
 
 /* MODAIS E GESTÃO */
 .modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.9);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 999;
-  padding: 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(4px); /* Efeito de vidro opcional */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 99999;
 }
 
 .modal-box {
-  background: #111;
-  border: 1px solid var(--dourado);
-  color: #fff;
-  padding: 30px;
-  border-radius: 10px;
-  text-align: center;
-  width: 100%;
-  max-width: 400px;
+    background: #1a1a1a;
+    border: 1px solid #d4af37;
+    padding: 40px;
+    width: 350px;       /* Largura fixa para parecer um card */
+    min-height: 350px;  /* Altura mínima para ser quadrado */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border-radius: 12px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+    animation: popupSurgir 0.3s ease-out;
+}
+
+@keyframes popupSurgir {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Botão dentro do Card */
+.btn-novo-agendamento {
+    background: #d4af37;
+    color: #000;
+    border: none;
+    padding: 15px 20px;
+    width: 100%;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 25px;
+    text-transform: uppercase;
+    transition: 0.3s;
+}
+
+.btn-novo-agendamento:hover {
+    filter: brightness(1.2);
 }
 
 .lista-gestao {
