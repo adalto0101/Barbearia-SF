@@ -35,7 +35,7 @@ function liberarAudio() {
 document.addEventListener('click', liberarAudio);
 
 // Data de hoje como padrão
-const hojeISO = new Date().toISOString().split('T')[0];
+const hojeISO = new Date().toLocaleDateString('pt-BR').split('/').reverse().join('-');;
 if (filtroData) filtroData.value = hojeISO;
 
 // --- 1️⃣ NOTIFICAÇÕES EM TEMPO REAL ---
