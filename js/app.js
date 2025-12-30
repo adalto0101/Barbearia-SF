@@ -228,7 +228,7 @@ btnConfirmarTudo.onclick = async (e) => {
   mostrarFeedback();
 };
 
-// --- 5 SISTEMA DE GESTÃO (CORRIGIDO PARA O SEU HTML) ---
+// --- 5 SISTEMA DE GESTÃO (VERSÃO CARD CENTRALIZADO) ---
 
 btnAbrirGestao.onclick = () => {
     const mg = document.getElementById('modal-gestao');
@@ -261,25 +261,20 @@ btnBuscarGestao.onclick = () => {
     }, { onlyOnce: true });
 };
 
-// FUNÇÃO PARA EXCLUIR E MOSTRAR O SEU MODAL 🗑️
+// FUNÇÃO PARA EXCLUIR E MOSTRAR O CARD QUADRADO 🗑️
 window.excluirAg = (id) => {
-    // Se você quiser eliminar 100% o confirm nativo, pode remover este 'if' 
-    // e deixar apenas o conteúdo interno. Mas por segurança, o confirm evita cliques acidentais.
     if (confirm("Deseja realmente cancelar este horário?")) {
         const agRef = ref(db, `agendamentos/${id}`);
 
         remove(agRef).then(() => {
-            // 1. Esconde o modal de busca/gestão
+            // 1. Esconde o modal de busca
             const mg = document.getElementById('modal-gestao');
             if (mg) mg.style.display = 'none';
 
-            // 2. Exibe o SEU modal de cancelamento (o da lixeira 🗑️)
+            // 2. Exibe o seu modal de cancelamento (Card Quadrado)
             const mc = document.getElementById('modal-cancelamento');
             if (mc) {
                 mc.style.display = 'flex';
-            } else {
-                // Caso o script não ache o ID, ele recarrega por segurança
-                location.reload();
             }
         }).catch(err => alert("Erro ao excluir: " + err));
     }
@@ -287,29 +282,34 @@ window.excluirAg = (id) => {
 
 // FUNÇÃO PARA REAGENDAR (LIMPA E VOLTA PRO TOPO)
 window.reagendarAg = (id, nome, whatsapp) => {
-    // Removendo o agendamento atual antes de permitir o novo
-    const agRef = ref(db, `agendamentos/${id}`);
-    
-    remove(agRef).then(() => {
-        // Preenche os campos principais para o cliente
-        const inputNome = document.querySelector('.cliente-nome');
-        const inputWhats = document.querySelector('.cliente-whatsapp');
+    if (confirm("Para reagendar, este horário será removido e você poderá escolher um novo. Continuar?")) {
+        const agRef = ref(db, `agendamentos/${id}`);
+        
+        remove(agRef).then(() => {
+            const inputNome = document.querySelector('.cliente-nome');
+            const inputWhats = document.querySelector('.cliente-whatsapp');
 
-        if (inputNome) inputNome.value = nome;
-        if (inputWhats) inputWhats.value = whatsapp;
+            if (inputNome) inputNome.value = nome;
+            if (inputWhats) inputWhats.value = whatsapp;
 
-        // Fecha o modal de gestão
-        const mg = document.getElementById('modal-gestao');
-        if (mg) mg.style.display = 'none';
+            const mg = document.getElementById('modal-gestao');
+            if (mg) mg.style.display = 'none';
 
-        alert("Horário antigo liberado! Agora escolha sua nova data e hora.");
-
-        // Sobe a tela para o formulário de agendamento
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
+            alert("Horário antigo liberado! Agora escolha sua nova data e hora.");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
 };
 
-// --- 6 REDIRECIONAMENTO IMEDIATO ---
+// --- 6 REDIRECIONAMENTO E AJUSTE DE BOTÕES ---
+
+// Esta parte garante que o clique no botão do modal funcione (Módulo Fix)
+document.addEventListener('click', (e) => {
+    if (e.target && e.target.classList.contains('btn-agendar')) {
+        location.reload();
+    }
+});
+
 function mostrarFeedback() {
-  window.location.href = "confirmacao.html";
+    window.location.href = "confirmacao.html";
 }
