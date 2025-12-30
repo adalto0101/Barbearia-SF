@@ -340,3 +340,23 @@ select:focus {
   flex-direction: column;
   gap: 5px;
 }
+.icon-cancel {
+  font-size: 50px;
+  margin-bottom: 15px;
+}
+
+#modal-cancelamento .modal-content {
+  text-align: center;
+  border-top: 5px solid #d4af37; /* Cor dourada da barbearia */
+}
+
+.btn-prosseguir {
+  background-color: #d4af37;
+  color: #000;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 20px;
+}
