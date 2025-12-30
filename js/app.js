@@ -228,7 +228,7 @@ btnConfirmarTudo.onclick = async (e) => {
   mostrarFeedback();
 };
 
-// --- 5 SISTEMA DE GESTÃO (FINAL CORRIGIDO) ---
+// --- 5 SISTEMA DE GESTÃO (PREMIUM - SEM POPUPS NATIVOS) ---
 
 btnAbrirGestao.onclick = () => {
     const mg = document.getElementById('modal-gestao');
@@ -261,58 +261,52 @@ btnBuscarGestao.onclick = () => {
     }, { onlyOnce: true });
 };
 
-// FUNÇÃO ÚNICA PARA PROCESSAR EXCLUSÃO OU REAGENDAMENTO SEM POPUP FEIO
+// FUNÇÃO ÚNICA PARA PROCESSAR TUDO NO SEU CARD PERSONALIZADO
 window.processarAcao = (id, tipo, nome = '', whatsapp = '') => {
-    // Criamos uma caixa de confirmação simples mas funcional no console ou personalizada
-    // Se quiser eliminar 100% o confirm feio, usamos um fluxo direto aqui:
-    
     const agRef = ref(db, `agendamentos/${id}`);
 
     remove(agRef).then(() => {
-        // Fecha o modal de busca
+        // Fecha o modal de lista de busca
         const mg = document.getElementById('modal-gestao');
         if (mg) mg.style.display = 'none';
 
         const mc = document.getElementById('modal-cancelamento');
         if (mc) {
+            // Busca elementos com segurança (if checks) para evitar erros de null
             const titulo = mc.querySelector('h2');
             const texto = mc.querySelector('p');
             const botao = mc.querySelector('.btn-agendar');
 
             if (tipo === 'excluir') {
-                titulo.innerText = "Descartado";
-                texto.innerHTML = "Seu agendamento foi excluído com sucesso. <br> O horário já está disponível.";
-                botao.innerText = "NOVO AGENDAMENTO";
+                if (titulo) titulo.innerText = "Descartado";
+                if (texto) texto.innerHTML = "Seu agendamento foi excluído com sucesso. <br> O horário já está disponível.";
+                if (botao) botao.innerText = "NOVO AGENDAMENTO";
             } else {
-                // Preenche os campos para reagendar
+                // Reagendar: Carrega dados de volta nos inputs
                 const inputNome = document.querySelector('.cliente-nome');
                 const inputWhats = document.querySelector('.cliente-whatsapp');
                 if (inputNome) inputNome.value = nome;
                 if (inputWhats) inputWhats.value = whatsapp;
 
-                titulo.innerText = "Horário Liberado";
-                texto.innerHTML = "O horário anterior foi removido. <br> Escolha o novo horário agora.";
-                botao.innerText = "ESCOLHER NOVO HORÁRIO";
+                if (titulo) titulo.innerText = "Horário Liberado";
+                if (texto) texto.innerHTML = "O horário anterior foi removido com sucesso. <br> Escolha o seu novo horário agora.";
+                if (botao) botao.innerText = "ESCOLHER NOVO HORÁRIO";
             }
             mc.style.display = 'flex';
         }
-    }).catch(err => alert("Erro: " + err));
+    }).catch(err => console.error("Erro na operação:", err));
 };
 
-// --- 6 REDIRECIONAMENTO E FIX DE BOTÕES ---
+// --- 6 FIX DE CLIQUES E REDIRECIONAMENTO ---
 
-// Lógica que "ouve" o clique no botão do seu card e faz a página resetar/sumir o card
+// Resolve o problema do botão "morto" no card (Módulo Fix)
 document.addEventListener('click', (e) => {
     if (e.target && e.target.classList.contains('btn-agendar')) {
         const mc = document.getElementById('modal-cancelamento');
-        if (mc) {
-            mc.style.display = 'none'; // Faz o card sumir
-        }
-        // Se for apenas para sumir o card e mostrar a index que está atrás:
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (mc) mc.style.display = 'none';
         
-        // Se quiser resetar a página inteira para limpar os campos:
-        // location.reload(); 
+        // Faz o scroll suave para o topo para o usuário agendar novamente
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 });
 
