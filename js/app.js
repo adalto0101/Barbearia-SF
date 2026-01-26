@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
+import { getDatabase, ref, push, onValue, remove, update, get } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyB-f47rzgtMlM-LQbVZt7TnPQhoYZadBQ4",
@@ -94,58 +94,76 @@ function atribuirEventosBloco(bloco) {
 }
 atribuirEventosBloco(document.querySelector('.bloco-agendamento'));
 
-// --- 3 GERA HORÁRIOS ---
-function gerarHorarios(bloco) {
+// --- NOVA FUNÇÃO: VERIFICAR RECESSO DINÂMICO ---
+async function verificarRecesso(dataSelecionada, bloco) {
+  const snapshot = await get(ref(db, 'configuracoes/recesso'));
+  const config = snapshot.val();
+
+  if (config && config.ativo && dataSelecionada >= config.inicio && dataSelecionada <= config.fim) {
+    // 1. Calcula dia de retorno (dia seguinte ao fim)
+    const dataFimObj = new Date(config.fim + 'T12:00:00');
+    dataFimObj.setDate(dataFimObj.getDate() + 1);
+
+    // Formato Brasileiro para Texto (Ex: 27/01/2026)
+    const retornoStr = dataFimObj.toLocaleDateString('pt-BR');
+
+    // Formato ISO para o Input Date (Ex: 2026-01-27)
+    const ano = dataFimObj.getFullYear();
+    const mes = String(dataFimObj.getMonth() + 1).padStart(2, '0');
+    const dia = String(dataFimObj.getDate()).padStart(2, '0');
+    const retornoISO = `${ano}-${mes}-${dia}`;
+
+    // Limpa a data selecionada errada e esconde horários
+    bloco.querySelector('.data-agenda').value = "";
+    bloco.querySelector('.secao-horarios').style.display = 'none';
+
+    // Remove overlay antigo se existir
+    const oldOverlay = document.querySelector('.overlay-recesso');
+    if (oldOverlay) oldOverlay.remove();
+
+    const overlay = document.createElement('div');
+    overlay.className = 'overlay-recesso';
+    overlay.style = `position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(rgba(0,0,0,0.8),rgba(0,0,0,0.8)),url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1000&q=80');background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;z-index:10000;padding:20px;backdrop-filter:blur(5px);`;
+
+    overlay.innerHTML = `
+      <div style="background:rgba(20,20,20,0.98);border:2px solid #d4af37;border-radius:20px;padding:40px 30px;max-width:450px;text-align:center;color:white;box-shadow:0 15px 50px rgba(0,0,0,1);">
+        <div style="font-size:50px;">🏖️</div>
+        <h2 style="color:#d4af37;margin:15px 0;font-family:'Cinzel Decorative',serif;">Pausa para Descanso</h2>
+        <p style="color:#eee;margin-bottom:20px;">Informamos que nesta data estaremos fechados para repor as energias.</p>
+        <div style="background:rgba(212,175,55,0.1);padding:15px;border-radius:10px;border:1px dashed #d4af37;margin-bottom:20px;">
+          <p style="margin:0;">Estaremos de volta dia:<br><strong>${retornoStr}</strong></p>
+        </div>
+        <button id="btn-reagendar-retorno" style="background:#d4af37;color:#000;border:none;padding:15px;width:100%;border-radius:8px;font-weight:bold;cursor:pointer; text-transform: uppercase;">Agendar para dia ${retornoStr}</button>
+      </div>`;
+
+    document.body.appendChild(overlay);
+
+    // LÓGICA DO BOTÃO "AGENDAR PARA DIA X"
+    document.getElementById('btn-reagendar-retorno').onclick = () => {
+      overlay.remove();
+      const inputData = bloco.querySelector('.data-agenda');
+      // Define a nova data automaticamente
+      inputData.value = retornoISO;
+      // Força a geração dos horários para a nova data
+      gerarHorarios(bloco);
+    };
+
+    return true;
+  }
+  return false;
+}
+
+// --- 3 GERA HORÁRIOS (ATUALIZADO) ---
+async function gerarHorarios(bloco) {
   const grid = bloco.querySelector('.grid-horarios');
   const dataAg = bloco.querySelector('.data-agenda').value;
   const servId = bloco.querySelector('.cliente-servico').value;
 
-  // ================================================================
-  // INICIO DO BLOCO DE RECESSO
-  // ================================================================
-  const INICIO_RECESSO = '2026-01-01';
-  const FIM_RECESSO = '2026-01-26';
-
-  if (dataAg >= INICIO_RECESSO && dataAg <= FIM_RECESSO) {
-    bloco.querySelector('.data-agenda').value = "";
-    bloco.querySelector('.secao-horarios').style.display = 'none';
-
-    const overlay = document.createElement('div');
-    overlay.style = `
-      position:fixed; top:0; left:0; width:100%; height:100%; 
-      background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1000&q=80');
-      background-size: cover; background-position: center;
-      display:flex; align-items:center; justify-content:center; 
-      z-index:10000; font-family:'Poppins', sans-serif; padding:20px; 
-      backdrop-filter: blur(3px);
-    `;
-
-    overlay.innerHTML = `
-      <div style="background:rgba(26, 26, 26, 0.95); border:2px solid #d4af37; border-radius:20px; padding:40px 30px; max-width:450px; text-align:center; color:white; box-shadow:0 15px 50px rgba(0,0,0,0.8);">
-        <div style="font-size:60px; margin-bottom:15px;">🏖️</div>
-        <h2 style="color:#d4af37; margin:0 0 15px 0; font-family:'Cinzel Decorative', serif; font-size:1.8rem;">Recesso SF</h2>
-        <p style="color:#eee; margin-bottom:25px; font-size:1.05rem; line-height:1.6;">
-          Estamos fazendo uma breve pausa para <strong>recarregar as energias</strong> e voltar melhores e mais fortes para você. <br><br>
-          Informamos que no período de <strong>01/01 a 26/01</strong> não haverá atendimento, mas a nossa agenda continua ativa!
-        </p>
-        <div style="background:rgba(212,175,55,0.15); border-radius:12px; padding:18px; margin-bottom:25px; border:1px dashed #d4af37;">
-          <p style="margin:0; font-size:15px; color:#fff;">
-            Você já pode <strong>garantir o seu horário</strong> <br> para o nosso retorno no dia <strong>27 de Janeiro</strong> <br> ou datas posteriores.
-          </p>
-        </div>
-        <button id="fechar-recesso" style="background:#d4af37; color:black; border:none; padding:16px 40px; border-radius:8px; font-weight:bold; cursor:pointer; width:100%; font-size:14px; text-transform:uppercase; letter-spacing:1px; box-shadow: 0 4px 15px rgba(212,175,55,0.3);">Agendar para o dia 27 ou depois</button>
-      </div>
-    `;
-
-    document.body.appendChild(overlay);
-    document.getElementById('fechar-recesso').onclick = () => overlay.remove();
-    return;
-  }
-  // ================================================================
-  // FIM DO BLOCO DE RECESSO
-  // ================================================================
-
   if (!dataAg || !servId) return;
+
+  // 1. VERIFICA SE ESTÁ EM RECESSO (NOVO)
+  const estaDeFolga = await verificarRecesso(dataAg, bloco);
+  if (estaDeFolga) return;
 
   bloco.querySelector('.secao-horarios').style.display = 'block';
   grid.innerHTML = "Carregando...";
@@ -155,7 +173,7 @@ function gerarHorarios(bloco) {
   const config = horariosFuncionamento[diaChave];
 
   if (!config || config.fechado) {
-    grid.innerHTML = "<p>Fechado</p>";
+    grid.innerHTML = "<p>Fechado neste dia</p>";
     return;
   }
 
@@ -163,15 +181,14 @@ function gerarHorarios(bloco) {
     const ags = Object.values(snapshot.val() || {}).filter(a => a.data === dataAg);
     grid.innerHTML = "";
 
-    // Loop que gera os horários de 20 em 20 minutos
     for (let t = paraMinutos(config.inicio); t <= paraMinutos(config.fim); t += 20) {
       const fimN = t + Number(servico.duracao);
-      
+
       // NOVA LÓGICA DE CONFLITO:
-      // Considera agendamentos normais E bloqueios manuais (que usam 20min por padrão se não tiverem duração)
+      // Considera agendamentos normais E bloqueios manuais (assumindo 20min se duracao for null)
       const conflito = ags.some(a => {
         const inicioAg = paraMinutos(a.hora);
-        const duracaoAg = Number(a.duracao) || 20; // Se for bloqueio manual s/ duração, assume 20min
+        const duracaoAg = Number(a.duracao) || 20;
         const fimAg = inicioAg + duracaoAg;
 
         return t < fimAg && fimN > inicioAg;
@@ -191,7 +208,6 @@ function gerarHorarios(bloco) {
           atualizarBloqueiosLocais();
         };
       } else {
-        // Estilo visual para horários bloqueados pelo barbeiro ou ocupados
         div.style.opacity = "0.3";
         div.style.pointerEvents = "none";
       }
@@ -225,7 +241,7 @@ btnConfirmarTudo.onclick = async (e) => {
   localStorage.setItem('listaAgendamentos', JSON.stringify(agendamentosParaSubir));
 
   for (let ag of agendamentosParaSubir) {
-    const agParaFirebase = { ...ag, data: ag.data.split('/').reverse().join('-'),notificado: false };
+    const agParaFirebase = { ...ag, data: ag.data.split('/').reverse().join('-'), notificado: false };
     await push(ref(db, 'agendamentos'), agParaFirebase);
   }
   mostrarFeedback();
@@ -234,86 +250,81 @@ btnConfirmarTudo.onclick = async (e) => {
 // --- 5 SISTEMA DE GESTÃO (ABORDAGEM DE DELEGAÇÃO) ---
 
 btnAbrirGestao.onclick = () => {
-    const mg = document.getElementById('modal-gestao');
-    if (mg) mg.style.display = 'flex';
+  const mg = document.getElementById('modal-gestao');
+  if (mg) mg.style.display = 'flex';
 };
 
 btnBuscarGestao.onclick = () => {
-    const tel = document.getElementById('busca-tel-gestao').value.replace(/\D/g, '');
-    if (!tel) return;
+  const tel = document.getElementById('busca-tel-gestao').value.replace(/\D/g, '');
+  if (!tel) return;
 
-    onValue(ref(db, 'agendamentos'), (snapshot) => {
-        const ags = snapshot.val() || {};
-        const resultado = document.getElementById('resultado-gestao');
-        resultado.innerHTML = "";
+  onValue(ref(db, 'agendamentos'), (snapshot) => {
+    const ags = snapshot.val() || {};
+    const resultado = document.getElementById('resultado-gestao');
+    resultado.innerHTML = "";
 
-        Object.entries(ags).forEach(([id, ag]) => {
-            if (ag.whatsapp === tel) {
-                const item = document.createElement('div');
-                item.className = 'item-gestao';
-                item.innerHTML = `
+    Object.entries(ags).forEach(([id, ag]) => {
+      if (ag.whatsapp === tel) {
+        const item = document.createElement('div');
+        item.className = 'item-gestao';
+        item.innerHTML = `
                   <p><strong>${ag.data.split('-').reverse().join('/')} às ${ag.hora}</strong><br>${ag.servico}</p>
                   <div class="acoes-gestao">
                     <button class="btn-reagendar" onclick="window.processarAcao('${id}', 'reagendar', '${ag.cliente}', '${ag.whatsapp}')">Reagendar</button>
                     <button class="btn-desistir" onclick="window.processarAcao('${id}', 'excluir')">Desistir</button>
                   </div>
                 `;
-                resultado.appendChild(item);
-            }
-        });
-    }, { onlyOnce: true });
+        resultado.appendChild(item);
+      }
+    });
+  }, { onlyOnce: true });
 };
 
 // FUNÇÃO GLOBAL DE PROCESSAMENTO
 window.processarAcao = (id, tipo, nome = '', whatsapp = '') => {
-    const agRef = ref(db, `agendamentos/${id}`);
+  const agRef = ref(db, `agendamentos/${id}`);
 
-    remove(agRef).then(() => {
-        if (modalGestao) modalGestao.style.display = 'none';
+  remove(agRef).then(() => {
+    if (modalGestao) modalGestao.style.display = 'none';
 
-        const mc = document.getElementById('modal-cancelamento');
-        if (mc) {
-            const titulo = mc.querySelector('h2');
-            const texto = mc.querySelector('p');
-            const botao = document.getElementById('btn-reload-gestao');
+    const mc = document.getElementById('modal-cancelamento');
+    if (mc) {
+      const titulo = mc.querySelector('h2');
+      const texto = mc.querySelector('p');
+      const botao = document.getElementById('btn-reload-gestao');
 
-            if (tipo === 'excluir') {
-                if (titulo) titulo.innerText = "Atendimento Descartado";
-                if (texto) texto.innerHTML = "Seu agendamento foi excluído com sucesso. <br> Você pode se quiser, prosseguir criando um novo agendamento agora.";
-            } else {
-                // Reagendamento: preenche os inputs
-                const inputNome = document.querySelector('.cliente-nome');
-                const inputWhats = document.querySelector('.cliente-whatsapp');
-                if (inputNome) inputNome.value = nome;
-                if (inputWhats) inputWhats.value = whatsapp;
+      if (tipo === 'excluir') {
+        if (titulo) titulo.innerText = "Atendimento Descartado";
+        if (texto) texto.innerHTML = "Seu agendamento foi excluído com sucesso. <br> Você pode se quiser, prosseguir criando um novo agendamento agora.";
+      } else {
+        // Reagendamento: preenche os inputs
+        const inputNome = document.querySelector('.cliente-nome');
+        const inputWhats = document.querySelector('.cliente-whatsapp');
+        if (inputNome) inputNome.value = nome;
+        if (inputWhats) inputWhats.value = whatsapp;
 
-                if (titulo) titulo.innerText = "HORÁRIO LIBERADO";
-                if (texto) texto.innerHTML = "O horário anterior foi removido com sucesso. <br> Escolha o seu novo horário agora.";
-            }
-            mc.style.display = 'flex';
-        }
-    }).catch(err => console.error("Erro Firebase:", err));
+        if (titulo) titulo.innerText = "HORÁRIO LIBERADO";
+        if (texto) texto.innerHTML = "O horário anterior foi removido com sucesso. <br> Escolha o seu novo horário agora.";
+      }
+      mc.style.display = 'flex';
+    }
+  }).catch(err => console.error("Erro Firebase:", err));
 };
 
 // --- 6 ABORDAGEM DEFINITIVA PARA O BOTÃO (DELEGAÇÃO DE EVENTO) ---
 
 // Ouvimos o clique no documento inteiro
 document.addEventListener('click', (event) => {
-    // Verificamos se o clique foi no botão pelo ID ou pela CLASSE
-    if (event.target && (event.target.id === 'btn-reload-gestao' || event.target.classList.contains('btn-novo-agendamento'))) {
-        
-        console.log("Botão clicado!"); // Para você testar no F12 se está funcionando
-        
-        const mc = document.getElementById('modal-cancelamento');
-        if (mc) {
-            mc.style.display = 'none'; // Fecha o card
-        }
-        
-        // Sobe para o topo suavemente
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+  // Verificamos se o clique foi no botão pelo ID ou pela CLASSE
+  if (event.target && (event.target.id === 'btn-reload-gestao' || event.target.classList.contains('btn-novo-agendamento'))) {
+    const mc = document.getElementById('modal-cancelamento');
+    if (mc) {
+      mc.style.display = 'none'; // Fecha o card
     }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 });
 
 function mostrarFeedback() {
-    window.location.href = "confirmacao.html";
+  window.location.href = "confirmacao.html";
 }
