@@ -18,7 +18,7 @@ const db = getDatabase(app);
 const listaAgendamentos = document.getElementById("lista-agendamentos");
 const filtroData = document.getElementById("filtro-data");
 const buscaCliente = document.getElementById("pesquisa-cliente");
-const togglePassados = document.getElementById("toggle-passados"); // Adicionado para a chave
+const togglePassados = document.getElementById("toggle-passados");
 const listaServicos = document.getElementById("lista-servicos");
 const formServico = document.getElementById('form-servico');
 const gradeBloqueio = document.getElementById('grade-bloqueio');
@@ -65,7 +65,7 @@ function exibirModalNovoAgendamento(ag) {
     somNotificacao.play().catch(e => console.log("Áudio aguardando interação."));
     setTimeout(() => {
       modal.style.display = 'none';
-    }, 60000); // 60000 milissegundos = 60 segundos.
+    }, 60000);
   }
 }
 
@@ -94,13 +94,11 @@ function carregarAgendamentos() {
           const matchesBusca = nomeAg.includes(termoBusca) || foneAg.includes(termoBusca);
 
           let matchesHorario = true;
-          // Início da alteração da chave
           if (togglePassados && togglePassados.checked) {
             if (dataAg === hojeISO) {
               matchesHorario = minutosAg >= minutosAtuais;
             }
           }
-          // Fim da alteração da chave
 
           return matchesData && matchesBusca && matchesHorario;
         })
@@ -118,14 +116,14 @@ function carregarAgendamentos() {
         card.className = `admin-card ${ag.cliente === "BLOQUEADO" ? "bloqueado" : ""}`;
 
         card.innerHTML = `
-          <div>
-            <strong>${ag.hora} — ${ag.cliente}</strong><br>
-            <small>${ag.servico || 'Bloqueio Manual'}</small>
-          </div>
-          <div class="btns-card">
-            ${ag.cliente !== "BLOQUEADO" ? `<a href="${urlWhats}" target="_blank" class="btn-whatsapp">WhatsApp</a>` : ''}
-            <button class="btn-delete">Excluir</button>
-          </div>`;
+          <div>
+            <strong>${ag.hora} — ${ag.cliente}</strong><br>
+            <small>${ag.servico || 'Bloqueio Manual'}</small>
+          </div>
+          <div class="btns-card">
+            ${ag.cliente !== "BLOQUEADO" ? `<a href="${urlWhats}" target="_blank" class="btn-whatsapp">WhatsApp</a>` : ''}
+            <button class="btn-delete">Excluir</button>
+          </div>`;
 
         card.querySelector(".btn-delete").onclick = () => {
           if (confirm(`Excluir agendamento de ${ag.cliente}?`)) remove(ref(db, `agendamentos/${id}`));
@@ -206,7 +204,8 @@ function gerarGradeBloqueio() {
                   data: dataSelecionada,
                   hora: horaFormatada,
                   whatsapp: "00000000000",
-                  servico: "Bloqueio Manual"
+                  servico: "Bloqueio Manual",
+                  duracao: 20 // <--- ADICIONADO PARA CORRIGIR O PROBLEMA NO APP.JS
                 });
               });
             } else if (ehBloqueio) {
@@ -236,15 +235,15 @@ function carregarServicos() {
         const card = document.createElement('div');
         card.className = 'servico-card';
         card.innerHTML = `
-          <div>
-            <strong>${s.ordem || '?'}. ${s.nome}</strong><br>
-            <small>R$ ${s.preco} | ${s.duracao}min</small>
-          </div>
-          <div class="btns-card">
-            <button class="btn-edit-ordem" title="Mudar Posição">🔢</button>
-            <button class="btn-edit-serv" title="Editar Preço">💰</button>
-            <button class="btn-del-serv" title="Excluir">🗑️</button>
-          </div>`;
+          <div>
+            <strong>${s.ordem || '?'}. ${s.nome}</strong><br>
+            <small>R$ ${s.preco} | ${s.duracao}min</small>
+          </div>
+          <div class="btns-card">
+            <button class="btn-edit-ordem" title="Mudar Posição">🔢</button>
+            <button class="btn-edit-serv" title="Editar Preço">💰</button>
+            <button class="btn-del-serv" title="Excluir">🗑️</button>
+          </div>`;
 
         card.querySelector('.btn-del-serv').onclick = () => {
           if (confirm(`Excluir serviço ${s.nome}?`)) remove(ref(db, `servicos/${id}`));
@@ -267,15 +266,18 @@ function carregarServicos() {
 const btnTabAg = document.getElementById('btn-agendamentos');
 const btnTabServ = document.getElementById('btn-servicos');
 const btnTabBloq = document.getElementById('btn-bloqueio');
+const btnTabRecesso = document.getElementById('btn-recesso'); // Novo botão
 
 function gerenciarAbas(abaAtiva) {
   document.getElementById('sec-agendamentos').style.display = abaAtiva === 'ag' ? 'block' : 'none';
   document.getElementById('sec-servicos').style.display = abaAtiva === 'serv' ? 'block' : 'none';
   document.getElementById('sec-bloqueio').style.display = abaAtiva === 'bloq' ? 'block' : 'none';
+  document.getElementById('sec-recesso').style.display = abaAtiva === 'recesso' ? 'block' : 'none';
 
   btnTabAg.classList.toggle('active', abaAtiva === 'ag');
   btnTabServ.classList.toggle('active', abaAtiva === 'serv');
   btnTabBloq.classList.toggle('active', abaAtiva === 'bloq');
+  btnTabRecesso.classList.toggle('active', abaAtiva === 'recesso');
 
   if (abaAtiva === 'bloq') gerarGradeBloqueio();
 }
@@ -283,8 +285,47 @@ function gerenciarAbas(abaAtiva) {
 if (btnTabAg) btnTabAg.onclick = () => gerenciarAbas('ag');
 if (btnTabServ) btnTabServ.onclick = () => gerenciarAbas('serv');
 if (btnTabBloq) btnTabBloq.onclick = () => gerenciarAbas('bloq');
+if (btnTabRecesso) btnTabRecesso.onclick = () => gerenciarAbas('recesso');
 
-// --- 7️⃣ FORMULÁRIO DE SERVIÇOS E FILTROS ---
+// --- 7️⃣ LOGICA DO RECESSO (NOVO) ---
+const btnSalvarRecesso = document.getElementById('btn-salvar-recesso');
+const btnRemoverRecesso = document.getElementById('btn-remover-recesso');
+const boxStatusRecesso = document.getElementById('status-recesso-box');
+const textoStatusRecesso = document.getElementById('texto-status-recesso');
+
+if (btnSalvarRecesso) {
+  btnSalvarRecesso.onclick = () => {
+    const inicio = document.getElementById('recesso-inicio').value;
+    const fim = document.getElementById('recesso-fim').value;
+    if (!inicio || !fim) return alert("Selecione o período completo!");
+
+    update(ref(db, 'configuracoes/recesso'), { inicio, fim, ativo: true })
+      .then(() => alert("Recesso ativado com sucesso!"));
+  };
+}
+
+if (btnRemoverRecesso) {
+  btnRemoverRecesso.onclick = () => {
+    update(ref(db, 'configuracoes/recesso'), { ativo: false })
+      .then(() => alert("Recesso removido! A agenda está aberta."));
+  };
+}
+
+// Monitorar status do recesso
+onValue(ref(db, 'configuracoes/recesso'), (snapshot) => {
+  const data = snapshot.val();
+  if (data && data.ativo) {
+    boxStatusRecesso.style.display = 'block';
+    const dataIni = data.inicio.split('-').reverse().join('/');
+    const dataFim = data.fim.split('-').reverse().join('/');
+    textoStatusRecesso.innerHTML = `Barbearia FECHADA de <strong>${dataIni}</strong> até <strong>${dataFim}</strong>.`;
+  } else {
+    boxStatusRecesso.style.display = 'none';
+  }
+});
+
+
+// --- 8️⃣ FORMULÁRIO DE SERVIÇOS E FILTROS ---
 if (formServico) formServico.onsubmit = (e) => {
   e.preventDefault();
   push(ref(db, 'servicos'), {
@@ -307,7 +348,7 @@ if (buscaCliente) buscaCliente.oninput = carregarAgendamentos;
 
 if (togglePassados) togglePassados.onchange = carregarAgendamentos;
 
-// --- 8️⃣ INICIALIZAÇÃO ---
+// --- 9️⃣ INICIALIZAÇÃO ---
 window.addEventListener('auth-ready', () => {
   carregarAgendamentos();
   carregarServicos();
