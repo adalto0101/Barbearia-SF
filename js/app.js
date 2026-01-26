@@ -100,7 +100,61 @@ function gerarHorarios(bloco) {
   const dataAg = bloco.querySelector('.data-agenda').value;
   const servId = bloco.querySelector('.cliente-servico').value;
 
- 
+  // ================================================================
+  // INICIO DO BLOCO DE RECESSO - APAGAR TUDO ATÉ O FIM DO BLOCO
+  // ================================================================
+  const INICIO_RECESSO = '2026-01-01';
+  const FIM_RECESSO = '2026-01-26';
+
+  if (dataAg >= INICIO_RECESSO && dataAg <= FIM_RECESSO) {
+    // 1. Limpa a data selecionada
+    bloco.querySelector('.data-agenda').value = "";
+    bloco.querySelector('.secao-horarios').style.display = 'none';
+
+    // 2. Cria o Modal Inline (Com imagem de fundo)
+    const overlay = document.createElement('div');
+    // Adicionei uma imagem de praia profissional via Unsplash e um degradê para escurecer um pouco
+    overlay.style = `
+      position:fixed; top:0; left:0; width:100%; height:100%; 
+      background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1000&q=80');
+      background-size: cover; background-position: center;
+      display:flex; align-items:center; justify-content:center; 
+      z-index:10000; font-family:'Poppins', sans-serif; padding:20px; 
+      backdrop-filter: blur(3px);
+    `;
+
+    overlay.innerHTML = `
+      <div style="background:rgba(26, 26, 26, 0.95); border:2px solid #d4af37; border-radius:20px; padding:40px 30px; max-width:450px; text-align:center; color:white; box-shadow:0 15px 50px rgba(0,0,0,0.8);">
+        <div style="font-size:60px; margin-bottom:15px;">🏖️</div>
+        <h2 style="color:#d4af37; margin:0 0 15px 0; font-family:'Cinzel Decorative', serif; font-size:1.8rem;">Recesso SF</h2>
+        
+        <p style="color:#eee; margin-bottom:25px; font-size:1.05rem; line-height:1.6;">
+          Estamos fazendo uma breve pausa para <strong>recarregar as energias</strong> e voltar melhores e mais fortes para você. <br><br>
+          Informamos que no período de <strong>01/01 a 26/01</strong> não haverá atendimento, mas a nossa agenda continua ativa!
+        </p>
+        
+        <div style="background:rgba(212,175,55,0.15); border-radius:12px; padding:18px; margin-bottom:25px; border:1px dashed #d4af37;">
+          <p style="margin:0; font-size:15px; color:#fff;">
+            Você já pode <strong>garantir o seu horário</strong> <br> para o nosso retorno no dia <strong>27 de Janeiro</strong> <br> ou datas posteriores.
+          </p>
+        </div>
+
+        <button id="fechar-recesso" style="background:#d4af37; color:black; border:none; padding:16px 40px; border-radius:8px; font-weight:bold; cursor:pointer; width:100%; font-size:14px; text-transform:uppercase; letter-spacing:1px; box-shadow: 0 4px 15px rgba(212,175,55,0.3);">Agendar para o dia 27 ou depois</button>
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    // 3. Função para fechar o modal
+    document.getElementById('fechar-recesso').onclick = () => {
+      overlay.remove();
+    };
+
+    return; // Para a execução do agendamento
+  }
+  // ================================================================
+  // FIM DO BLOCO DE RECESSO
+  // ================================================================
 
   if (!dataAg || !servId) return;
 
