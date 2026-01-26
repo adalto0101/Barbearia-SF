@@ -222,7 +222,7 @@ btnConfirmarTudo.onclick = async (e) => {
   localStorage.setItem('listaAgendamentos', JSON.stringify(agendamentosParaSubir));
 
   for (let ag of agendamentosParaSubir) {
-    const agParaFirebase = { ...ag, data: ag.data.split('/').reverse().join('-') };
+    const agParaFirebase = { ...ag, data: ag.data.split('/').reverse().join('-'),notificado: false };
     await push(ref(db, 'agendamentos'), agParaFirebase);
   }
   mostrarFeedback();
