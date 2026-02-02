@@ -13,6 +13,8 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+let servicosDisponiveis = {};
+
 
 // --- SELETORES GERAIS ---
 const listaAgendamentos = document.getElementById("lista-agendamentos");
@@ -20,8 +22,10 @@ const filtroData = document.getElementById("filtro-data");
 const buscaCliente = document.getElementById("pesquisa-cliente");
 const togglePassados = document.getElementById("toggle-passados");
 const listaServicos = document.getElementById("lista-servicos");
+const btnTabManual = document.getElementById('btn-agendar-manual');
 const formServico = document.getElementById('form-servico');
 const gradeBloqueio = document.getElementById('grade-bloqueio');
+
 
 // --- SISTEMA DE ÁUDIO E DESBLOQUEIO ---
 const somNotificacao = new Audio('notificacao.mp3');
@@ -84,6 +88,7 @@ function carregarAgendamentos() {
 
       const itens = Object.entries(data)
         .filter(([id, ag]) => {
+          if (!ag || !ag.hora || !ag.data) return false;
           const dataAg = ag.data;
           const [hAg, mAg] = ag.hora.split(":").map(Number);
           const minutosAg = (hAg * 60) + mAg;
@@ -125,27 +130,29 @@ function carregarAgendamentos() {
           </div>
 
           <div class="btns-card">
+
+            <div class="custom-select" data-id="${id}" data-valor="${pagamentoAtual}">
+              <div class="custom-select-trigger">
+                💳 ${pagamentoAtual}
+                <span class="arrow">▾</span>
+              </div>
+              <div class="custom-options">
+                <div class="custom-option" data-value="Pagamento digital">Pagamento Digital</div>
+                <div class="custom-option" data-value="Pagamento em Dinheiro">Pagamento em Dinheiro</div>
+                <div class="custom-option" data-value="Pendente">Pendente</div>
+              </div>
+            </div>
+            
             ${ag.cliente !== "BLOQUEADO"
                     ? `<a href="${urlWhats}" target="_blank" class="btn-whatsapp">WhatsApp</a>`
                     : ''}
 
-            <select class="select-pagamento">
-              <option value="digital" ${pagamentoAtual === "digital" ? "selected" : ""}>Digital</option>
-              <option value="dinheiro" ${pagamentoAtual === "dinheiro" ? "selected" : ""}>Dinheiro</option>
-              <option value="pendente" ${pagamentoAtual === "pendente" ? "selected" : ""}>Pendente</option>
-            </select>
+            
+
 
             <button class="btn-delete">Excluir</button>
           </div>
         `;
-        
-        const selectPagamento = card.querySelector(".select-pagamento");
-
-        selectPagamento.onchange = (e) => {
-          update(ref(db, `agendamentos/${id}`), {
-            formaPagamento: e.target.value
-          });
-        };
 
 
         card.querySelector(".btn-delete").onclick = () => {
@@ -252,6 +259,7 @@ function carregarServicos() {
     if (!listaServicos) return;
     listaServicos.innerHTML = "";
     const data = snapshot.val();
+    servicosDisponiveis = data;
     if (data) {
       const ordenados = Object.entries(data).sort(([, a], [, b]) => (a.ordem || 99) - (b.ordem || 99));
       ordenados.forEach(([id, s]) => {
@@ -296,7 +304,9 @@ function gerenciarAbas(abaAtiva) {
   document.getElementById('sec-servicos').style.display = abaAtiva === 'serv' ? 'block' : 'none';
   document.getElementById('sec-bloqueio').style.display = abaAtiva === 'bloq' ? 'block' : 'none';
   document.getElementById('sec-recesso').style.display = abaAtiva === 'recesso' ? 'block' : 'none';
-
+  document.getElementById('sec-agendar-manual').style.display = abaAtiva === 'manual' ? 'block' : 'none';
+    
+  btnTabManual.classList.toggle('active', abaAtiva === 'manual');
   btnTabAg.classList.toggle('active', abaAtiva === 'ag');
   btnTabServ.classList.toggle('active', abaAtiva === 'serv');
   btnTabBloq.classList.toggle('active', abaAtiva === 'bloq');
@@ -309,6 +319,8 @@ if (btnTabAg) btnTabAg.onclick = () => gerenciarAbas('ag');
 if (btnTabServ) btnTabServ.onclick = () => gerenciarAbas('serv');
 if (btnTabBloq) btnTabBloq.onclick = () => gerenciarAbas('bloq');
 if (btnTabRecesso) btnTabRecesso.onclick = () => gerenciarAbas('recesso');
+if (btnTabManual) btnTabManual.onclick = () => { gerenciarAbas('manual'); carregarFormularioManual();};
+
 
 // --- 7️⃣ LOGICA DO RECESSO (NOVO) ---
 const btnSalvarRecesso = document.getElementById('btn-salvar-recesso');
@@ -370,6 +382,203 @@ if (filtroData) filtroData.onchange = () => {
 if (buscaCliente) buscaCliente.oninput = carregarAgendamentos;
 
 if (togglePassados) togglePassados.onchange = carregarAgendamentos;
+
+// --- 8.1 FORMULÁRIO DE AGENDAMENTO MANUAL ---
+const manualNome = document.getElementById('manual-nome');
+const manualWhats = document.getElementById('manual-whatsapp');
+const manualServicoSelect = document.getElementById('manual-servico-select');
+const manualServicoOptions = document.getElementById('manual-servico-options');
+let manualServicoSelecionado = null;
+const manualData = document.getElementById('manual-data');
+const manualPagamentoSelect = document.getElementById('manual-pagamento-select');
+let manualPagamentoValor = 'digital';
+const manualGrid = document.getElementById('manual-grid-horarios');
+const btnSalvarManual = document.getElementById('btn-salvar-agendamento-manual');
+
+let horarioManualSelecionado = null;
+
+// Popular serviços
+function carregarFormularioManual() {
+  if (!manualServicoOptions) return;
+
+  manualServicoOptions.innerHTML = "";
+  manualServicoSelecionado = null;
+
+  if (!servicosDisponiveis || Object.keys(servicosDisponiveis).length === 0) {
+    manualServicoOptions.innerHTML =
+      `<div class="custom-option" data-value="">Nenhum serviço cadastrado</div>`;
+    return;
+  }
+
+  Object.entries(servicosDisponiveis).forEach(([id, s]) => {
+    const opt = document.createElement('div');
+    opt.className = 'custom-option';
+    opt.dataset.value = id;
+    opt.innerText = `${s.nome} — R$ ${s.preco}`;
+    manualServicoOptions.appendChild(opt);
+  });
+
+  manualServicoSelect.querySelector('.custom-select-trigger').innerHTML =
+    `✂️ Selecione o serviço <span class="arrow">▾</span>`;
+}
+
+
+function paraMinutos(hora) {
+  if (!hora || !hora.includes(":")) return 0;
+  const [h, m] = hora.split(":").map(Number);
+  return (h * 60) + m;
+}
+
+
+manualData.onchange = gerarHorariosManuais;
+
+function gerarHorariosManuais() {
+  if (!manualData.value || !manualServicoSelecionado) return;
+
+
+  manualGrid.innerHTML = "Carregando...";
+  horarioManualSelecionado = null;
+
+  onValue(ref(db, 'agendamentos'), (snapshot) => {
+    const ags = Object.values(snapshot.val() || {})
+      .filter(a => a.data === manualData.value);
+
+    manualGrid.innerHTML = "";
+
+    for (let t = 0; t < 24 * 60; t += 20) {
+      const h = String(Math.floor(t / 60)).padStart(2, '0');
+      const m = String(t % 60).padStart(2, '0');
+      const horaStr = `${h}:${m}`;
+
+      const conflito = ags.some(a => {
+        const ini = paraMinutos(a.hora);
+        const dur = Number(a.duracao) || 20;
+        return t < (ini + dur) && (t + 20) > ini;
+      });
+
+      const div = document.createElement('button');
+      div.className = `btn-hora ${conflito ? 'ocupado' : ''}`;
+      div.innerText = horaStr;
+
+      if (!conflito) {
+        div.onclick = () => {
+          document.querySelectorAll('#manual-grid-horarios .btn-hora')
+            .forEach(b => b.classList.remove('livre'));
+          div.classList.add('livre');
+          horarioManualSelecionado = horaStr;
+        };
+      }
+
+      manualGrid.appendChild(div);
+    }
+  }, { onlyOnce: true });
+}
+
+btnSalvarManual.onclick = async () => {
+  if (!manualNome.value || !manualWhats.value || !manualServicoSelecionado
+ || !manualData.value || !horarioManualSelecionado) {
+    return alert("Preencha todos os campos e selecione o horário.");
+  }
+
+  const serv = servicosDisponiveis[manualServicoSelecionado];
+
+
+  await push(ref(db, 'agendamentos'), {
+    cliente: manualNome.value,
+    whatsapp: manualWhats.value.replace(/\D/g, ''),
+    servico: serv.nome,
+    data: manualData.value,
+    hora: horarioManualSelecionado,
+    duracao: Number(serv.duracao),
+    formaPagamento: manualPagamentoValor,
+    criadoPor: "barbeiro",
+    agendamentoExtra: true,
+    timestamp: Date.now()
+  });
+
+  alert("Agendamento criado com sucesso!");
+
+  manualNome.value = "";
+  manualWhats.value = "";
+  manualServicoSelecionado = null;
+  manualServicoSelect.querySelector('.custom-select-trigger').innerHTML =
+    `✂️ Selecione o serviço <span class="arrow">▾</span>`;
+  manualData.value = "";
+  manualGrid.innerHTML = "";
+};
+
+// --- 8.2 SELECT CUSTOMIZADO (FORMA DE PAGAMENTO) ---
+document.addEventListener('click', (e) => {
+  document.querySelectorAll('.custom-select').forEach(sel => {
+    if (!sel.contains(e.target)) sel.classList.remove('open');
+  });
+
+  const trigger = e.target.closest('.custom-select-trigger');
+  if (!trigger) return;
+
+  const select = trigger.parentElement;
+  select.classList.toggle('open');
+});
+
+document.addEventListener('click', (e) => {
+  const option = e.target.closest('.custom-option');
+  if (!option) return;
+
+  const select = option.closest('.custom-select');
+  if (!select) return;
+
+  // ignora select do agendamento manual
+  if (select.id === 'manual-pagamento-select') return;
+
+  if (!select.dataset.id) return;
+
+
+  const agendamentoId = select.dataset.id;
+  const valor = option.dataset.value;
+
+  select.querySelector('.custom-select-trigger').innerHTML =
+    `💳 ${option.innerText} <span class="arrow">▾</span>`;
+
+  select.classList.remove('open');
+
+  update(ref(db, `agendamentos/${agendamentoId}`), {
+    formaPagamento: valor
+  });
+});
+
+// --- SELECT CUSTOMIZADO - SERVIÇO (AGENDAMENTO MANUAL) ---
+document.addEventListener('click', (e) => {
+  const option = e.target.closest('#manual-servico-options .custom-option');
+  if (!option) return;
+
+  manualServicoSelecionado = option.dataset.value;
+
+  const serv = servicosDisponiveis[manualServicoSelecionado];
+
+  manualServicoSelect.querySelector('.custom-select-trigger').innerHTML =
+    `✂️ ${serv.nome} <span class="arrow">▾</span>`;
+
+  manualServicoSelect.classList.remove('open');
+
+  gerarHorariosManuais();
+});
+
+// --- SELECT CUSTOMIZADO - PAGAMENTO (AGENDAMENTO MANUAL) ---
+document.addEventListener('click', (e) => {
+  const option = e.target.closest(
+    '#manual-pagamento-select .custom-option'
+  );
+  if (!option) return;
+
+  manualPagamentoValor = option.dataset.value;
+
+  manualPagamentoSelect.querySelector('.custom-select-trigger').innerHTML =
+    `💳 ${option.innerText} <span class="arrow">▾</span>`;
+
+  manualPagamentoSelect.classList.remove('open');
+});
+
+
 
 // --- 9️⃣ INICIALIZAÇÃO ---
 window.addEventListener('auth-ready', () => {
