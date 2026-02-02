@@ -491,3 +491,18 @@ header h1 {
 
 input:checked + .slider { background-color: #d4af37; }
 input:checked + .slider:before { transform: translateX(20px); }
+
+.select-pagamento {
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: var(--preto);
+  color: white;
+  border: 1px solid var(--dourado);
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.select-pagamento:focus {
+  outline: none;
+  border-color: var(--verde);
+}
