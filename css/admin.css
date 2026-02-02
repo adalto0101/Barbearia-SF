@@ -206,7 +206,7 @@ header h1 {
   gap: 10px;
 }
 
-.btn-whatsapp,
+
 .btn-delete,
 .btn-edit-serv,
 .btn-del-serv {
@@ -220,7 +220,19 @@ header h1 {
 }
 
 .btn-whatsapp {
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  color: white;
   background: var(--verde);
+  display: flex;
+  align-items: center;
+    /* Centraliza verticalmente */
+  justify-content: center;
+    /* Centraliza horizontalmente */
 }
 
 .btn-delete,
@@ -492,6 +504,7 @@ header h1 {
 input:checked + .slider { background-color: #d4af37; }
 input:checked + .slider:before { transform: translateX(20px); }
 
+
 .select-pagamento {
   padding: 6px 8px;
   border-radius: 6px;
@@ -505,4 +518,141 @@ input:checked + .slider:before { transform: translateX(20px); }
 .select-pagamento:focus {
   outline: none;
   border-color: var(--verde);
+}
+
+/* --- SELECT CUSTOMIZADO --- */
+.custom-select {
+  position: relative;
+  min-width: 160px;
+  font-size: 0.8rem;
+  user-select: none;
+  display: flex;
+  align-items: center;
+      /* Centraliza verticalmente */
+  justify-content: center;
+      /* Centraliza horizontalmente */
+}
+
+.custom-select-trigger {
+  background: var(--preto);
+  border: 1px solid var(--dourado);
+  color: var(--branco);
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: 0.3s;
+}
+
+.custom-select-trigger:hover {
+  background: rgba(212, 175, 55, 0.1);
+}
+
+.custom-select.open .custom-select-trigger {
+  border-color: var(--verde);
+}
+
+.custom-select .arrow {
+  font-size: 0.7rem;
+  opacity: 0.8;
+}
+
+.custom-options {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 100%;
+  background: var(--preto);
+  border: 1px solid var(--dourado);
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8);
+  display: none;
+  z-index: 9999;
+  overflow: hidden;
+}
+
+.custom-select.open .custom-options {
+  display: block;
+}
+
+.custom-option {
+  padding: 10px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.custom-option:hover {
+  background: var(--dourado);
+  color: var(--preto);
+}
+
+/* ===== FORMULÁRIO AGENDAMENTO MANUAL ===== */
+.form-agendamento-manual {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 420px;
+}
+
+.form-agendamento-manual input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  background: #111;
+  color: #fff;
+  font-size: 14px;
+
+}
+
+.form-agendamento-manual input:focus {
+  outline: none;
+  border-color: #d4af37;
+
+}
+
+/* ================================
+   CENTRALIZAÇÃO – AGENDAMENTO MANUAL
+================================ */
+
+.manual-wrapper {
+  max-width: 420px;
+  width: 100%;
+  margin: 0 auto;
+  /* CENTRALIZA HORIZONTAL */
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* força layout em coluna */
+.manual-form {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 15px;
+}
+
+/* inputs e selects 100% */
+.manual-form input,
+.manual-form .custom-select {
+  width: 100%;
+}
+
+/* bloco de horários centralizado */
+.manual-horarios {
+  text-align: center;
+}
+
+.manual-horarios label {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--dourado);
+  font-size: 0.9rem;
+}
+
+/* botão central */
+#btn-salvar-agendamento-manual {
+  width: 100%;
 }
