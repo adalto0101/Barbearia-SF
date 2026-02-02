@@ -45,6 +45,7 @@
       <nav class="admin-nav">
         <button id="btn-agendamentos" class="active">Agendamentos</button>
         <button id="btn-bloqueio">Bloquear Horários</button>
+        <button id="btn-agendar-manual">Agendar Cliente</button>
         <button id="btn-servicos">Serviços</button>
         <button id="btn-recesso">Folga</button>
       </nav>
@@ -75,6 +76,52 @@
         </div>
         <div id="lista-agendamentos" class="lista"></div>
       </section>
+
+      <section id="sec-agendar-manual" style="display:none;">
+            <div class="manual-wrapper">
+              <h2>✍️ Agendamento Manual</h2>
+              <div id="form-agendamento-manual"></div>
+                  <div class="form-agendamento-manual">
+                    <input type="text" id="manual-nome" placeholder="Nome do Cliente" required>
+                    <input type="tel" id="manual-whatsapp" placeholder="WhatsApp (somente números)" required>
+                  
+                    <div class="custom-select manual-select" id="manual-servico-select">
+                      <div class="custom-select-trigger">
+                        ✂️ Selecione o serviço
+                        <span class="arrow">▾</span>
+                      </div>
+                      <div class="custom-options" id="manual-servico-options"></div>
+                    </div>
+
+                  
+                    <div class="custom-select manual-select" id="manual-pagamento-select" data-valor="digital">
+                      <div class="custom-select-trigger">
+                        💳 Pagamento Digital
+                        <span class="arrow">▾</span>
+                      </div>
+                      <div class="custom-options">
+                        <div class="custom-option" data-value="digital">Pagamento Digital</div>
+                        <div class="custom-option" data-value="dinheiro">Pagamento em Dinheiro</div>
+                        <div class="custom-option" data-value="pendente">Pendente</div>
+                      </div>
+                  </div>
+
+                
+                  <input type="date" id="manual-data" required>
+                
+              </div>
+            </div> 
+              <div style="margin-top:20px;">
+                <label style="color:#d4af37;">Selecione o Horário</label>
+                <div id="manual-grid-horarios" class="grade-horarios"></div>
+              </div>
+              
+              <button id="btn-salvar-agendamento-manual" class="btn-save" style="margin-top:20px;">
+                Salvar Agendamento
+              </button>
+
+      </section>
+
 
       <section id="sec-servicos" style="display:none;">
         <h2>💈 Serviços</h2>
