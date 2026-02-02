@@ -111,19 +111,42 @@ function carregarAgendamentos() {
 
       itens.forEach(([id, ag]) => {
         const dataBR = ag.data.split("-").reverse().join("/");
-        const urlWhats = `https://wa.me/55${ag.whatsapp}?text=Olá! Confirmamos seu agendamento em ${dataBR} às ${ag.hora}.`;
+        const urlWhats = `https://wa.me/55${ag.whatsapp}?text=Olá! Confirmamos seu agendamento do serviço de _*${ag.servico}*_ aqui na *Barberia SF* em _${dataBR}_ às _${ag.hora}_.`;
         const card = document.createElement("div");
         card.className = `admin-card ${ag.cliente === "BLOQUEADO" ? "bloqueado" : ""}`;
+
+        const pagamentoAtual = ag.formaPagamento || "digital";
 
         card.innerHTML = `
           <div>
             <strong>${ag.hora} — ${ag.cliente}</strong><br>
-            <small>${ag.servico || 'Bloqueio Manual'}</small>
+            <small>${ag.servico || 'Bloqueio Manual'}</small><br>
+            <small style="opacity:.7">💳 ${pagamentoAtual}</small>
           </div>
+
           <div class="btns-card">
-            ${ag.cliente !== "BLOQUEADO" ? `<a href="${urlWhats}" target="_blank" class="btn-whatsapp">WhatsApp</a>` : ''}
+            ${ag.cliente !== "BLOQUEADO"
+                    ? `<a href="${urlWhats}" target="_blank" class="btn-whatsapp">WhatsApp</a>`
+                    : ''}
+
+            <select class="select-pagamento">
+              <option value="digital" ${pagamentoAtual === "digital" ? "selected" : ""}>Digital</option>
+              <option value="dinheiro" ${pagamentoAtual === "dinheiro" ? "selected" : ""}>Dinheiro</option>
+              <option value="pendente" ${pagamentoAtual === "pendente" ? "selected" : ""}>Pendente</option>
+            </select>
+
             <button class="btn-delete">Excluir</button>
-          </div>`;
+          </div>
+        `;
+        
+        const selectPagamento = card.querySelector(".select-pagamento");
+
+        selectPagamento.onchange = (e) => {
+          update(ref(db, `agendamentos/${id}`), {
+            formaPagamento: e.target.value
+          });
+        };
+
 
         card.querySelector(".btn-delete").onclick = () => {
           if (confirm(`Excluir agendamento de ${ag.cliente}?`)) remove(ref(db, `agendamentos/${id}`));
