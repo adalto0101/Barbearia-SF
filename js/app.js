@@ -234,7 +234,7 @@ btnConfirmarTudo.onclick = async (e) => {
 
     agendamentosParaSubir.push({
       cliente: nome, whatsapp: whats, servico: servicosDisponiveis[servId].nome,
-      data: data.split('-').reverse().join('/'), hora, duracao: Number(servicosDisponiveis[servId].duracao), timestamp: Date.now()
+      data: data.split('-').reverse().join('/'), hora, duracao: Number(servicosDisponiveis[servId].duracao), formaPagamento: "digital", timestamp: Date.now()
     });
   }
 
