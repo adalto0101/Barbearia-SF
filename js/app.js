@@ -218,12 +218,14 @@ async function gerarHorarios(bloco) {
 }
 
 async function enviarParaWebhook(dados) {
-  const WEBHOOK_URL = 'https://034b-2804-4f60-7dbc-6400-a5e2-c52d-9a4f-dceb.ngrok-free.app/webhook/barbearia';
+  // Verifique se a URL do ngrok abaixo ainda é a mesma no seu terminal!
+  const WEBHOOK_URL = 'https://034b-2804-4f60-7dbc-6400-a5e2-c52d-9a4f-dceb.ngrok-free.app/webhook-test/barbearia';
 
   try {
-    fetch(WEBHOOK_URL, {
+    // O return await é essencial para o loop esperar o envio
+    return await fetch(WEBHOOK_URL, {
       method: 'POST',
-      mode: 'no-cors', // Mantemos para evitar o erro de CORS
+      mode: 'no-cors',
       headers: {
         'ngrok-skip-browser-warning': 'true'
       },
@@ -263,11 +265,12 @@ btnConfirmarTudo.onclick = async (e) => {
     const agParaFirebase = { ...ag, data: ag.data.split('/').reverse().join('-'), notificado: false };
     await push(ref(db, 'agendamentos'), agParaFirebase);
     // DISPARA O N8N AQUI
-    // Passamos o agParaFirebase que já está com a data formatada corretamente
-    enviarParaWebhook(agParaFirebase);
+    console.log(`Enviando agendamento de ${agParaFirebase.cliente} ao n8n...`);
     await enviarParaWebhook(agParaFirebase);
+    setTimeout(() => {
+      mostrarFeedback();
+    }, 500); // Pequena folga de segurança
   }
-  mostrarFeedback();
 };
 
 // --- 5 SISTEMA DE GESTÃO (ABORDAGEM DE DELEGAÇÃO) ---
