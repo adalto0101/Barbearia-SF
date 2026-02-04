@@ -217,6 +217,29 @@ async function gerarHorarios(bloco) {
   }, { onlyOnce: true });
 }
 
+async function enviarParaWebhook(dados) {
+  const WEBHOOK_URL = 'http://host.docker.internal:5678/webhook-test/https://barbearia-sf-default-rtdb.firebaseio.com/agendamentos'; // <--- Troque pela URL do seu gatilho Webhook no n8n
+
+  try {
+    const response = await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(dados)
+    });
+
+    if (!response.ok) {
+      console.error('Erro ao enviar para o n8n:', response.statusText);
+    } else {
+      console.log('Dados enviados para o n8n com sucesso!');
+    }
+  } catch (error) {
+    console.error('Falha na comunicação com o Webhook:', error);
+  }
+}
+
+
 // --- 4 FINALIZAR AGENDAMENTOS ---
 btnConfirmarTudo.onclick = async (e) => {
   e.preventDefault();
