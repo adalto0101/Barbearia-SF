@@ -218,7 +218,7 @@ async function gerarHorarios(bloco) {
 }
 
 async function enviarParaWebhook(dados) {
-  const WEBHOOK_URL = 'https://034b-2804-4f60-7dbc-6400-a5e2-c52d-9a4f-dceb.ngrok-free.app/webhook-test/barbearia';
+  const WEBHOOK_URL = 'https://034b-2804-4f60-7dbc-6400-a5e2-c52d-9a4f-dceb.ngrok-free.app/webhook/barbearia';
 
   try {
     fetch(WEBHOOK_URL, {
