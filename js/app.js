@@ -218,24 +218,20 @@ async function gerarHorarios(bloco) {
 }
 
 async function enviarParaWebhook(dados) {
-  const WEBHOOK_URL = 'https://034b-2804-4f60-7dbc-6400-a5e2-c52d-9a4f-dceb.ngrok-free.app/webhook-test/barbearia'; // <--- Troque pela URL do seu gatilho Webhook no n8n
+  const WEBHOOK_URL = 'https://034b-2804-4f60-7dbc-6400-a5e2-c52d-9a4f-dceb.ngrok-free.app/webhook-test/barbearia';
 
   try {
-    const response = await fetch(WEBHOOK_URL, {
+    fetch(WEBHOOK_URL, {
       method: 'POST',
+      mode: 'no-cors', // Mantemos para evitar o erro de CORS
       headers: {
-        'Content-Type': 'application/json'
+        'ngrok-skip-browser-warning': 'true'
       },
       body: JSON.stringify(dados)
     });
-
-    if (!response.ok) {
-      console.error('Erro ao enviar para o n8n:', response.statusText);
-    } else {
-      console.log('Dados enviados para o n8n com sucesso!');
-    }
+    console.log('✅ Agendamento enviado para o n8n!');
   } catch (error) {
-    console.error('Falha na comunicação com o Webhook:', error);
+    console.error('❌ Erro ao disparar Webhook:', error);
   }
 }
 
@@ -269,6 +265,7 @@ btnConfirmarTudo.onclick = async (e) => {
     // DISPARA O N8N AQUI
     // Passamos o agParaFirebase que já está com a data formatada corretamente
     enviarParaWebhook(agParaFirebase);
+    await enviarParaWebhook(agParaFirebase);
   }
   mostrarFeedback();
 };
