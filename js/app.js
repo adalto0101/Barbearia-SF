@@ -266,6 +266,9 @@ btnConfirmarTudo.onclick = async (e) => {
   for (let ag of agendamentosParaSubir) {
     const agParaFirebase = { ...ag, data: ag.data.split('/').reverse().join('-'), notificado: false };
     await push(ref(db, 'agendamentos'), agParaFirebase);
+    // DISPARA O N8N AQUI
+    // Passamos o agParaFirebase que já está com a data formatada corretamente
+    enviarParaWebhook(agParaFirebase);
   }
   mostrarFeedback();
 };
