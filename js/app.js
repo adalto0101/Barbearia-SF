@@ -88,6 +88,9 @@ btnAddPessoa.onclick = () => {
 
 function atribuirEventosBloco(bloco) {
   const inputData = bloco.querySelector('.data-agenda');
+  // --- NOVA LINHA AQUI: Define a data mínima como HOJE ---
+  inputData.min = new Date().toISOString().split("T")[0];
+  
   const inputServico = bloco.querySelector('.cliente-servico');
   inputData.onchange = () => gerarHorarios(bloco);
   inputServico.onchange = () => gerarHorarios(bloco);
@@ -153,7 +156,8 @@ async function verificarRecesso(dataSelecionada, bloco) {
   return false;
 }
 
-// --- 3 GERA HORÁRIOS (ATUALIZADO) ---
+
+// --- 3 GERA HORÁRIOS (ATUALIZADO COM FILTRO DE HORA ATUAL) ---
 async function gerarHorarios(bloco) {
   const grid = bloco.querySelector('.grid-horarios');
   const dataAg = bloco.querySelector('.data-agenda').value;
@@ -161,7 +165,6 @@ async function gerarHorarios(bloco) {
 
   if (!dataAg || !servId) return;
 
-  // 1. VERIFICA SE ESTÁ EM RECESSO (NOVO)
   const estaDeFolga = await verificarRecesso(dataAg, bloco);
   if (estaDeFolga) return;
 
@@ -169,7 +172,8 @@ async function gerarHorarios(bloco) {
   grid.innerHTML = "Carregando...";
 
   const servico = servicosDisponiveis[servId];
-  const diaChave = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'][new Date(dataAg + 'T00:00:00').getDay()];
+  const dataObjeto = new Date(dataAg + 'T00:00:00');
+  const diaChave = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'][dataObjeto.getDay()];
   const config = horariosFuncionamento[diaChave];
 
   if (!config || config.fechado) {
@@ -177,20 +181,31 @@ async function gerarHorarios(bloco) {
     return;
   }
 
+  // Lógica para pegar a hora atual se for o dia de hoje
+  const agora = new Date();
+  const hojeFormatoISO = agora.toISOString().split('T')[0];
+  const ehHoje = dataAg === hojeFormatoISO;
+  const minutosAgora = (agora.getHours() * 60) + agora.getMinutes();
+
   onValue(ref(db, 'agendamentos'), (snapshot) => {
     const ags = Object.values(snapshot.val() || {}).filter(a => a.data === dataAg);
     grid.innerHTML = "";
 
     for (let t = paraMinutos(config.inicio); t <= paraMinutos(config.fim); t += 20) {
+      
+      // REGRA 1: Verificar se o horário já passou (apenas para o dia de hoje)
+      // Adicionamos uma margem de segurança (ex: 5 minutos) se quiser, ou t < minutosAgora direto
+      if (ehHoje && t <= minutosAgora) {
+        continue; // Pula para o próximo horário do loop, não mostra este.
+      }
+
       const fimN = t + Number(servico.duracao);
 
-      // NOVA LÓGICA DE CONFLITO:
-      // Considera agendamentos normais E bloqueios manuais (assumindo 20min se duracao for null)
+      // REGRA 2: Verificar conflito com agendamentos existentes
       const conflito = ags.some(a => {
         const inicioAg = paraMinutos(a.hora);
         const duracaoAg = Number(a.duracao) || 20;
         const fimAg = inicioAg + duracaoAg;
-
         return t < fimAg && fimN > inicioAg;
       });
 
@@ -213,6 +228,11 @@ async function gerarHorarios(bloco) {
       }
       grid.appendChild(div);
     }
+
+    if (grid.innerHTML === "") {
+        grid.innerHTML = "<p>Não há mais horários disponíveis para hoje.</p>";
+    }
+    
     atualizarBloqueiosLocais();
   }, { onlyOnce: true });
 }
