@@ -499,7 +499,7 @@ btnSalvarManual.onclick = async () => {
   alert("Agendamento criado com sucesso!");
 
   manualNome.value = "";
-  manualWhats.value = "11900000000";
+  manualWhats.value = "";
   manualServicoSelecionado = null;
   manualServicoSelect.querySelector('.custom-select-trigger').innerHTML =
     `✂️ Selecione o serviço <span class="arrow">▾</span>`;
