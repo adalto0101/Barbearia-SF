@@ -165,6 +165,17 @@ async function gerarHorarios(bloco) {
 
   if (!dataAg || !servId) return;
 
+  // --- NOVA TRAVA DE SEGURANÇA: Bloqueia dias passados ---
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0); // Zera as horas para comparar apenas a data
+  const dataSelecionada = new Date(dataAg + 'T00:00:00');
+
+  if (dataSelecionada < hoje) {
+    grid.innerHTML = "<p style='color: #ff4444;'>Não é possível agendar em datas passadas.</p>";
+    return;
+  }
+  // -----------------------------------------------------
+
   const estaDeFolga = await verificarRecesso(dataAg, bloco);
   if (estaDeFolga) return;
 
