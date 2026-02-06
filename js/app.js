@@ -88,8 +88,18 @@ btnAddPessoa.onclick = () => {
 
 function atribuirEventosBloco(bloco) {
   const inputData = bloco.querySelector('.data-agenda');
-  // --- NOVA LINHA AQUI: Define a data mínima como HOJE ---
+// 1. Mantém a sua trava de data mínima
   inputData.min = new Date().toISOString().split("T")[0];
+
+  // 2. NOVA TRAVA: Impede digitação manual (Bloqueia qualquer tecla)
+  inputData.onkeydown = (e) => e.preventDefault();
+
+  // 3. OPCIONAL: Abre o seletor de data ao clicar em qualquer lugar do campo (melhora o UX)
+  inputData.onclick = () => {
+    if (typeof inputData.showPicker === 'function') {
+      inputData.showPicker();
+    }
+  }
   
   const inputServico = bloco.querySelector('.cliente-servico');
   inputData.onchange = () => gerarHorarios(bloco);
