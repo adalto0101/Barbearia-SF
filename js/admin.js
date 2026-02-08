@@ -474,27 +474,6 @@ function gerarHorariosManuais() {
   }, { onlyOnce: true });
 }
 
-async function enviarParaWebhook(dados) {
-  // Verifique se a URL do ngrok abaixo ainda é a mesma no seu terminal!
-  const WEBHOOK_URL = 'https://n8n.oreonsolucoes.dpdns.org/webhook/barbearia';
-
-  try {
-    // O return await é essencial para o loop esperar o envio
-    return await fetch(WEBHOOK_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: {
-        'ngrok-skip-browser-warning': 'true'
-      },
-      body: JSON.stringify(dados)
-    });
-    console.log('✅ Agendamento enviado para o n8n!');
-  } catch (error) {
-    console.error('❌ Erro ao disparar Webhook:', error);
-  }
-}
-
-
 btnSalvarManual.onclick = async () => {
   if (!manualNome.value || !manualWhats.value || !manualServicoSelecionado
  || !manualData.value || !horarioManualSelecionado) {
@@ -515,12 +494,6 @@ btnSalvarManual.onclick = async () => {
     criadoPor: "barbeiro",
     agendamentoExtra: true,
     timestamp: Date.now()
-    // DISPARA O N8N AQUI
-    console.log(`Enviando agendamento de ${agParaFirebase.cliente} ao n8n...`);
-    await enviarParaWebhook(agParaFirebase);
-    setTimeout(() => {
-      mostrarFeedback();
-    }, 500); // Pequena folga de segurança
   });
 
   alert("Agendamento criado com sucesso!");
