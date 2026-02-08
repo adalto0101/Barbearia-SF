@@ -295,26 +295,36 @@ btnConfirmarTudo.onclick = async (e) => {
     const data = bloco.querySelector('.data-agenda').value;
     const hora = bloco.dataset.hora;
 
-    if (!nome || !whats || !hora) return alert("Preencha todos os campos e selecione o horário!");
+    if (!nome || !whats || !hora) return alert("Preencha todos os campos!");
 
     agendamentosParaSubir.push({
-      cliente: nome, whatsapp: whats, servico: servicosDisponiveis[servId].nome,
-      data: data.split('-').reverse().join('/'), hora, duracao: Number(servicosDisponiveis[servId].duracao), formaPagamento: "digital", timestamp: Date.now()
+      cliente: nome, 
+      whatsapp: whats, 
+      servico: servicosDisponiveis[servId].nome,
+      data: data.split('-').reverse().join('/'), 
+      hora, 
+      duracao: Number(servicosDisponiveis[servId].duracao), 
+      formaPagamento: "digital", 
+      timestamp: Date.now()
     });
   }
 
   localStorage.setItem('listaAgendamentos', JSON.stringify(agendamentosParaSubir));
 
+  // --- O AJUSTE ESTÁ AQUI ---
   for (let ag of agendamentosParaSubir) {
     const agParaFirebase = { ...ag, data: ag.data.split('/').reverse().join('-'), notificado: false };
+    
+    // 1. Salva no Firebase
     await push(ref(db, 'agendamentos'), agParaFirebase);
-    // DISPARA O N8N AQUI
+    
+    // 2. Envia para o Webhook e ESPERA (await) a resposta
     console.log(`Enviando agendamento de ${agParaFirebase.cliente} ao n8n...`);
-    await enviarParaWebhook(agParaFirebase);
-    setTimeout(() => {
-      mostrarFeedback();
-    }, 500); // Pequena folga de segurança
+    await enviarParaWebhook(agParaFirebase); 
   }
+
+  // 3. Só muda de página DEPOIS que o loop de envios terminar
+  mostrarFeedback();
 };
 
 // --- 5 SISTEMA DE GESTÃO (ABORDAGEM DE DELEGAÇÃO) ---
