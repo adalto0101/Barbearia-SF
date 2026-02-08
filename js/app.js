@@ -259,7 +259,7 @@ async function gerarHorarios(bloco) {
 }
 
 async function enviarParaWebhook(dados) {
-  const WEBHOOK_URL = 'https://n8n.oreonsolucoes.dpdns.org/webhook-test/barbearia';
+  const WEBHOOK_URL = 'https://n8n.oreonsolucoes.dpdns.org/webhook/barbearia';
 
   try {
     const response = await fetch(WEBHOOK_URL, {
