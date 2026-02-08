@@ -1,6 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
 import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
 
+// Configuração do Firebase (Mantida a sua)
 const firebaseConfig = {
     apiKey: "AIzaSyB-f47rzgtMlM-LQbVZt7TnPQhoYZadBQ4",
     authDomain: "barbearia-sf.firebaseapp.com",
@@ -14,31 +15,32 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// Elementos das Abas
-const btnFin = document.getElementById('tab-financeiro');
-const btnHist = document.getElementById('tab-historico');
-const secFin = document.getElementById('sec-financeiro');
-const secHist = document.getElementById('sec-historico');
-
-// Filtros
+// --- ELEMENTOS ---
 const inputInicio = document.getElementById('filtro-inicio');
 const inputFim = document.getElementById('filtro-fim');
 const btnFiltrar = document.getElementById('btn-filtrar');
 const btnLimpar = document.getElementById('btn-limpar');
+const listaHistorico = document.getElementById('lista-historico');
+const resumoFin = document.getElementById('resumo-financeiro');
+const opcoesPagamento = document.querySelectorAll('.custom-option');
 
-// Alternar Abas
-btnFin.onclick = () => {
-    btnFin.classList.add('active'); btnHist.classList.remove('active');
-    secFin.style.display = 'block'; secHist.style.display = 'none';
-};
-btnHist.onclick = () => {
-    btnHist.classList.add('active'); btnFin.classList.remove('active');
-    secHist.style.display = 'block'; secFin.style.display = 'none';
-};
+// --- LÓGICA DE SELEÇÃO DO DROPDOWN CUSTOMIZADO ---
+opcoesPagamento.forEach(opcao => {
+    opcao.onclick = () => {
+        // Remove a classe selected de todas e adiciona na clicada
+        opcoesPagamento.forEach(opt => opt.classList.remove('selected'));
+        opcao.classList.add('selected');
+    };
+});
 
+// --- LÓGICA DE FILTRAGEM UNIFICADA ---
 btnFiltrar.onclick = () => {
     const inicio = inputInicio.value;
     const fim = inputFim.value;
+
+    // Pega o método selecionado no momento
+    const opcaoSelecionada = document.querySelector('.custom-option.selected');
+    const metodo = opcaoSelecionada ? opcaoSelecionada.getAttribute('data-value') : 'todos';
 
     if (!inicio || !fim) return alert("Por favor, selecione as datas de início e fim.");
 
@@ -47,60 +49,73 @@ btnFiltrar.onclick = () => {
             const agendamentos = snapAg.val() || {};
             const servicos = snapServ.val() || {};
 
-            let totalDinheiro = 0;
-            let totalQtd = 0;
-            let htmlHistorico = "";
+            let somaTotal = 0;
+            let contador = 0;
+            let htmlCards = "";
 
-            // Filtra agendamentos no intervalo e ordena por data/hora
-            const filtrados = Object.values(agendamentos)
-                .filter(ag => ag.data && ag.data >= inicio && ag.data <= fim)
-                .sort((a, b) => a.data.localeCompare(b.data) || a.hora.localeCompare(b.hora));
+            // Filtro Único: Data + Método de Pagamento
+            const filtrados = Object.values(agendamentos).filter(ag => {
+                const passData = ag.data >= inicio && ag.data <= fim;
+                const passMetodo = (metodo === 'todos') || (ag.formaPagamento === metodo);
+                return passData && passMetodo;
+            }).sort((a, b) => a.data.localeCompare(b.data) || a.hora.localeCompare(b.hora));
 
             filtrados.forEach(ag => {
-                // Busca o serviço correspondente para pegar o preço
+                // Busca o preço no banco de serviços
                 const sInfo = Object.values(servicos).find(s => s.nome === ag.servico);
-
-                // AJUSTE: Se o preço for "A combinar" ou não for número, vira 0
                 let precoVal = 0;
+
                 if (sInfo && typeof sInfo.preco === 'number') {
                     precoVal = sInfo.preco;
                 } else if (sInfo && !isNaN(parseFloat(sInfo.preco))) {
                     precoVal = parseFloat(sInfo.preco);
                 }
 
-                totalDinheiro += precoVal;
-                totalQtd++;
+                somaTotal += precoVal;
+                contador++;
 
                 const dataBR = ag.data.split('-').reverse().join('/');
-                const exibicaoPreco = precoVal > 0 ? `R$ ${precoVal.toFixed(2)}` : "A combinar (R$ 0,00)";
 
-                htmlHistorico += `
-                    <div class="admin-card">
+                // Cores dinâmicas para o badge
+                let badgeColor = "#ffca28"; // Padrão Amarelo
+                if (ag.formaPagamento === 'pendente') badgeColor = "#ff4444";
+                if (ag.formaPagamento === 'digital') badgeColor = "#4db8ff";
+
+                htmlCards += `
+                    <div class="admin-card" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px; border-left: 4px solid ${badgeColor};">
                         <div>
-                            <strong>${ag.cliente}</strong><br>
+                            <strong>${ag.cliente}</strong> 
+                            <span style="font-size: 10px; background: #222; color: ${badgeColor}; padding: 2px 6px; border-radius: 4px; border: 1px solid #444; margin-left: 8px; text-transform: uppercase;">
+                                ${ag.formaPagamento ? ag.formaPagamento : 'N/D'}
+                            </span><br>
                             <small>${dataBR} - ${ag.hora} | ${ag.servico}</small>
                         </div>
-                        <div style="color:${precoVal > 0 ? 'var(--verde)' : '#999'}">
-                            ${exibicaoPreco}
+                        <div style="text-align: right;">
+                            <span style="color: var(--verde); font-weight: bold; font-size: 1.1rem;">R$ ${precoVal.toFixed(2)}</span>
                         </div>
                     </div>`;
             });
 
-            // Atualiza Resumo Financeiro
-            document.getElementById('resumo-financeiro').style.display = 'flex';
-            document.getElementById('total-valor').innerText = `R$ ${totalDinheiro.toFixed(2)}`;
-            document.getElementById('total-servicos').innerText = `${totalQtd} atendimentos realizados no período`;
+            // Exibe o Resumo e a Lista ao mesmo tempo
+            resumoFin.style.display = 'flex';
+            document.getElementById('total-valor').innerText = `R$ ${somaTotal.toFixed(2)}`;
+            document.getElementById('total-servicos').innerText = `${contador} atendimentos detalhados abaixo`;
 
-            // Atualiza Lista de Histórico
-            document.getElementById('lista-historico').innerHTML = htmlHistorico || "<p style='text-align:center;'>Nenhum agendamento encontrado neste intervalo.</p>";
+            listaHistorico.innerHTML = htmlCards || "<p style='text-align:center; padding: 20px; opacity:0.6;'>Nenhum registro encontrado para este filtro.</p>";
 
         }, { onlyOnce: true });
     }, { onlyOnce: true });
 };
 
+// --- LIMPAR TUDO ---
 btnLimpar.onclick = () => {
     inputInicio.value = "";
     inputFim.value = "";
-    document.getElementById('resumo-financeiro').style.display = 'none';
-    document.getElementById('lista-historico').innerHTML = "<p style='text-align:center; opacity:0.5;'>Selecione as datas para buscar o histórico.</p>";
+    resumoFin.style.display = 'none';
+    listaHistorico.innerHTML = "<p style='text-align:center; opacity:0.5; padding: 40px;'>Selecione o período e o método para buscar os dados.</p>";
+
+    // Reseta o dropdown para 'todos'
+    opcoesPagamento.forEach(opt => opt.classList.remove('selected'));
+    const optTodos = document.querySelector('.custom-option[data-value="todos"]');
+    if (optTodos) optTodos.classList.add('selected');
 };
