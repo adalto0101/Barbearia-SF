@@ -259,25 +259,28 @@ async function gerarHorarios(bloco) {
 }
 
 async function enviarParaWebhook(dados) {
-  // Verifique se a URL do ngrok abaixo ainda é a mesma no seu terminal!
   const WEBHOOK_URL = 'https://n8n.oreonsolucoes.dpdns.org/webhook/barbearia';
 
   try {
-    // O return await é essencial para o loop esperar o envio
-    return await fetch(WEBHOOK_URL, {
+    const response = await fetch(WEBHOOK_URL, {
       method: 'POST',
-      mode: 'no-cors',
       headers: {
-        'ngrok-skip-browser-warning': 'true'
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify(dados)
     });
+
+    if (!response.ok) {
+      throw new Error(`Erro HTTP: ${response.status}`);
+    }
+
     console.log('✅ Agendamento enviado para o n8n!');
+    return response;
+
   } catch (error) {
     console.error('❌ Erro ao disparar Webhook:', error);
   }
 }
-
 
 // --- 4 FINALIZAR AGENDAMENTOS ---
 btnConfirmarTudo.onclick = async (e) => {
