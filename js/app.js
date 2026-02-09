@@ -313,15 +313,30 @@ btnConfirmarTudo.onclick = async (e) => {
 
   // --- O AJUSTE ESTÁ AQUI ---
   for (let ag of agendamentosParaSubir) {
-    const agParaFirebase = { ...ag, data: ag.data.split('/').reverse().join('-'), notificado: false };
+    const agParaFirebase = { 
+        ...ag, 
+        data: ag.data.split('/').reverse().join('-'), 
+        notificado: false 
+    };
     
-    // 1. Salva no Firebase
-    await push(ref(db, 'agendamentos'), agParaFirebase);
+    // 1. Cria a referência antes de enviar (isso gera o ID no JS mesmo antes de subir)
+    const novaRef = push(ref(db, 'agendamentos'));
+    const idGerado = novaRef.key; // <--- AQUI ESTÁ O ID (Ex: -OheETF...)
+
+    // 2. Salva no Firebase usando a referência que já tem o ID
+    console.log(`Salvando no Firebase com ID: ${idGerado}`);
+    await update(novaRef, agParaFirebase); 
     
-    // 2. Envia para o Webhook e ESPERA (await) a resposta
+    // 3. Adiciona o ID aos dados que vão para o n8n
+    const dadosParaWebhook = {
+        id_firebase: idGerado, // Envia o ID para o n8n usar depois
+        ...agParaFirebase
+    };
+
+    // 4. Envia para o Webhook e ESPERA (await) a resposta
     console.log(`Enviando agendamento de ${agParaFirebase.cliente} ao n8n...`);
-    await enviarParaWebhook(agParaFirebase); 
-  }
+    await enviarParaWebhook(dadosParaWebhook); 
+}
 
   // 3. Só muda de página DEPOIS que o loop de envios terminar
   mostrarFeedback();
