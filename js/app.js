@@ -203,10 +203,11 @@ async function gerarHorarios(bloco) {
   }
 
   // Lógica para pegar a hora atual se for o dia de hoje
-  const agora = new Date(new Date().toLocaleDateString('en-CA'));
+  const agora = new Date(); // hora REAL
   const hojeFormatoISO = agora.toISOString().split('T')[0];
   const ehHoje = dataAg === hojeFormatoISO;
   const minutosAgora = (agora.getHours() * 60) + agora.getMinutes();
+
 
   onValue(ref(db, 'agendamentos'), (snapshot) => {
     const ags = Object.values(snapshot.val() || {}).filter(a => a.data === dataAg);
