@@ -175,16 +175,27 @@ async function gerarHorarios(bloco) {
 
   if (!dataAg || !servId) return;
 
-  // --- NOVA TRAVA DE SEGURANÇA: Bloqueia dias passados ---
-  const hoje = new Date();
-  hoje.setHours(0, 0, 0, 0); // Zera as horas para comparar apenas a data
-  const dataSelecionada = new Date(dataAg + 'T00:00:00');
+  // --- CORREÇÃO DE FUSO HORÁRIO ---
+  // Pegamos a data atual local (sem horas)
+  const agora = new Date();
+  const hojeComparacao = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate());
+  
+  // Criamos a data selecionada garantindo que seja tratada como local
+  const [ano, mes, dia] = dataAg.split('-').map(Number);
+  const dataSelecionada = new Date(ano, mes - 1, dia);
 
-  if (dataSelecionada < hoje) {
+  // Se a data selecionada for antes de hoje, bloqueia
+  if (dataSelecionada < hojeComparacao) {
     grid.innerHTML = "<p style='color: #ff4444;'>Não é possível agendar em datas passadas.</p>";
     return;
   }
-  // -----------------------------------------------------
+
+  // Verifica se é exatamente hoje para filtrar horários passados
+  const ehHoje = dataSelecionada.getTime() === hojeComparacao.getTime();
+  
+  // Minutos atuais para esconder horários que já passaram
+  const minutosAgora = (agora.getHours() * 60) + agora.getMinutes();
+  // ---------------------------------
 
   const estaDeFolga = await verificarRecesso(dataAg, bloco);
   if (estaDeFolga) return;
