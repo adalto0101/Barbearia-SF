@@ -176,7 +176,7 @@ async function gerarHorarios(bloco) {
   if (!dataAg || !servId) return;
 
   // --- NOVA TRAVA DE SEGURANÇA: Bloqueia dias passados ---
-  const hoje = new Date();
+  const hoje = new Date(new Date().toLocaleDateString('en-CA'));
   hoje.setHours(0, 0, 0, 0); // Zera as horas para comparar apenas a data
   const dataSelecionada = new Date(dataAg + 'T00:00:00');
 
@@ -203,7 +203,7 @@ async function gerarHorarios(bloco) {
   }
 
   // Lógica para pegar a hora atual se for o dia de hoje
-  const agora = new Date();
+  const agora = new Date(new Date().toLocaleDateString('en-CA'));
   const hojeFormatoISO = agora.toISOString().split('T')[0];
   const ehHoje = dataAg === hojeFormatoISO;
   const minutosAgora = (agora.getHours() * 60) + agora.getMinutes();
