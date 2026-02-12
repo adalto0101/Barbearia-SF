@@ -137,9 +137,9 @@ function carregarAgendamentos() {
                 <span class="arrow">▾</span>
               </div>
               <div class="custom-options">
-                <div class="custom-option" data-value="Pagamento digital">Pagamento Digital</div>
-                <div class="custom-option" data-value="Pagamento em Dinheiro">Pagamento em Dinheiro</div>
-                <div class="custom-option" data-value="Pendente">Pendente</div>
+                <div class="custom-option" data-value="digital">Pagamento Digital</div>
+                <div class="custom-option" data-value="dinheiro">Pagamento em Dinheiro</div>
+                <div class="custom-option" data-value="pendente">Pendente</div>
               </div>
             </div>
             
