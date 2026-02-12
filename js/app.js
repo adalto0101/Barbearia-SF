@@ -89,7 +89,7 @@ btnAddPessoa.onclick = () => {
 function atribuirEventosBloco(bloco) {
   const inputData = bloco.querySelector('.data-agenda');
 // 1. Mantém a sua trava de data mínima
-  inputData.min = new Date().toISOString().split("T")[0];
+  inputData.min = new Date().toLocaleDateString('en-CA');
 
   // 2. NOVA TRAVA: Impede digitação manual (Bloqueia qualquer tecla)
   inputData.onkeydown = (e) => e.preventDefault();
