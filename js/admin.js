@@ -372,7 +372,7 @@ function gerarGradeBloqueio() {
       const dataBR = dataSelecionada.split('-').reverse().join('/');
 
       for (let h = parseInt(config.inicio); h < parseInt(config.fim); h++) {
-        for (let m = 0; m <= 60; m += 20) {
+        for (let m = 0; m < 60; m += 20) {
           const horaFormatada = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
           const agId = Object.keys(agendados).find(id => agendados[id].data === dataSelecionada && agendados[id].hora === horaFormatada);
           const ocupado = !!agId;
