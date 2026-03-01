@@ -137,6 +137,7 @@ function carregarAgendamentos() {
       const itens = Object.entries(data)
         .filter(([id, ag]) => {
           if (!ag || !ag.hora || !ag.data) return false;
+          if (ag.servicoId === "bloqueio") return false;
           const dataAg = ag.data;
           const [hAg, mAg] = ag.hora.split(":").map(Number);
           const minutosAg = (hAg * 60) + mAg;
