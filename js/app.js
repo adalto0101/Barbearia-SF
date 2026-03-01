@@ -262,7 +262,7 @@ async function gerarHorarios(bloco) {
 
 async function enviarParaWebhook(dados) {
   // Verifique se a URL do ngrok abaixo ainda é a mesma no seu terminal!
-  const WEBHOOK_URL = 'https://n8n.oreonsolucoes.dpdns.org/webhook-test/barbearia';
+  const WEBHOOK_URL = 'https://n8n.oreonsolucoes.dpdns.org/webhook/barbearia';
 
   try {
     // O return await é essencial para o loop esperar o envio
