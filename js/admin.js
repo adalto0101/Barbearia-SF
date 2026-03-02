@@ -623,14 +623,16 @@ function gerarHorariosManuais() {
       });
 
       const div = document.createElement('button');
-      div.className = `btn-hora ${conflito ? 'ocupado' : ''}`;
+      div.className = conflito
+      ? 'btn-hora ocupado'
+      : 'btn-hora livre';
       div.innerText = horaStr;
 
       if (!conflito) {
         div.onclick = () => {
           document.querySelectorAll('#manual-grid-horarios .btn-hora')
-            .forEach(b => b.classList.remove('livre'));
-          div.classList.add('livre');
+          .forEach(b => b.classList.remove('selected'));
+          div.classList.add('selected');
           horarioManualSelecionado = horaStr;
         };
       }
