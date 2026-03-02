@@ -640,6 +640,24 @@ function gerarHorariosManuais() {
   }, { onlyOnce: true });
 }
 
+async function enviarParaWebhook(dados) {
+  const WEBHOOK_URL = 'https://n8n.oreonsolucoes.dpdns.org/webhook/barbearia';
+
+  try {
+    await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(dados)
+    });
+
+    console.log("✅ Webhook enviado");
+  } catch (erro) {
+    console.error("❌ Erro ao enviar webhook:", erro);
+  }
+}
+
 btnSalvarManual.onclick = async () => {
   if (
     !manualNome.value ||
@@ -656,22 +674,26 @@ btnSalvarManual.onclick = async () => {
 
   const valorBase = Number(serv.preco);
 
-  await push(ref(db, 'agendamentos'), {
-    cliente: manualNome.value,
-    whatsapp: manualWhats.value.replace(/\D/g, ''),
-    servicoId: manualServicoSelecionado,
-    servicoNome: serv.nome,
-    valor: valorBase,
-    valorFinal: valorBase,
-    valorExtra: 0,
-    data: manualData.value,
-    hora: horarioManualSelecionado,
-    duracao: Number(serv.duracao),
-    formaPagamento: manualPagamentoValor,
-    criadoPor: "barbeiro",
-    agendamentoExtra: true,
-    timestamp: Date.now()
-  });
+  const novoAgendamento = {
+  cliente: manualNome.value,
+  whatsapp: manualWhats.value.replace(/\D/g, ''),
+  servicoId: manualServicoSelecionado,
+  servicoNome: serv.nome,
+  valor: valorBase,
+  valorFinal: valorBase,
+  valorExtra: 0,
+  data: manualData.value,
+  hora: horarioManualSelecionado,
+  duracao: Number(serv.duracao),
+  formaPagamento: manualPagamentoValor,
+  criadoPor: "barbeiro",
+  agendamentoExtra: true,
+  timestamp: Date.now()
+  };
+  
+  await push(ref(db, 'agendamentos'), novoAgendamento);
+  
+  await enviarParaWebhook(novoAgendamento);
 
   alert("Agendamento criado com sucesso!");
 
