@@ -313,7 +313,6 @@ btnConfirmarTudo.onclick = async (e) => {
   
   e.stopPropagation(); // 🔒 trava qualquer outro evento
 
-  const blocos = document.querySelectorAll('.bloco-agendamento');
 
   const whatsapp = blocos[0]
     .querySelector('.cliente-whatsapp')
