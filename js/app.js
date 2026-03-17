@@ -304,6 +304,13 @@ function mostrarModalBloqueado() {
 // --- 4 FINALIZAR AGENDAMENTOS ---
 btnConfirmarTudo.onclick = async (e) => {
   e.preventDefault();
+  // 1. BLOQUEIO CONTRA CLIQUE DUPLO
+  if (btnConfirmarTudo.disabled) return; 
+  btnConfirmarTudo.disabled = true;
+  btnConfirmarTudo.innerText = "Processando...";
+
+  const blocos = document.querySelectorAll('.bloco-agendamento');
+  
   e.stopPropagation(); // 🔒 trava qualquer outro evento
 
   const blocos = document.querySelectorAll('.bloco-agendamento');
