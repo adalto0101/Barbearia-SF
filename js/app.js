@@ -304,14 +304,28 @@ function mostrarModalBloqueado() {
 // --- 4 FINALIZAR AGENDAMENTOS ---
 btnConfirmarTudo.onclick = async (e) => {
   e.preventDefault();
+  
   // 1. BLOQUEIO CONTRA CLIQUE DUPLO
   if (btnConfirmarTudo.disabled) return; 
-  btnConfirmarTudo.disabled = true;
-  btnConfirmarTudo.innerText = "Processando...";
 
   const blocos = document.querySelectorAll('.bloco-agendamento');
   
-  e.stopPropagation(); // 🔒 trava qualquer outro evento
+  // Pega o valor do primeiro bloco para validar
+  const campoWhats = blocos[0].querySelector('.cliente-whatsapp');
+  const whatsappSomenteNumeros = campoWhats.value.replace(/\D/g, '');
+
+  // --- AQUI ENTRA A TRAVA ---
+  if (whatsappSomenteNumeros.length < 10) {
+    alert("⚠️ Por favor, insira o WhatsApp completo com DDD (mínimo 10 dígitos).");
+    campoWhats.focus();
+    return; // Para a execução aqui e não deixa agendar
+  }
+  // -------------------------
+
+  btnConfirmarTudo.disabled = true;
+  btnConfirmarTudo.innerText = "Processando...";
+
+  e.stopPropagation();
 
 
   const whatsapp = blocos[0]
