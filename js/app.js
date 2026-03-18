@@ -316,7 +316,7 @@ btnConfirmarTudo.onclick = async (e) => {
 
   // --- AQUI ENTRA A TRAVA ---
   if (whatsappSomenteNumeros.length < 10) {
-    alert("⚠️ Por favor, insira o WhatsApp completo com DDD (mínimo 10 dígitos).");
+    alert("⚠️ Opa! O número está incompleto. Digite o seu WhatsApp com o DDD para a gente conseguir confirmar seu horário! Exemplo: (11) 99999-8888");
     campoWhats.focus();
     return; // Para a execução aqui e não deixa agendar
   }
