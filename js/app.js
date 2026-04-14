@@ -49,7 +49,16 @@ function renderizarSelectServicos() {
     const valorAtual = sel.value;
     sel.innerHTML = `<option value="">Selecione um serviço</option>`;
     listaOrdenada.forEach(([id, s]) => {
-      sel.innerHTML += `<option value="${id}">${s.nome} — R$${s.preco}</option>`;
+      let textoServico;
+
+      // Se for serviço "a combinar" OU preço 0
+      if (s.aCombinar || Number(s.preco) === 0) {
+        textoServico = `${s.nome} — A combinar`;
+      } else {
+        textoServico = `${s.nome} — R$${s.preco}`;
+      }
+      
+      sel.innerHTML += `<option value="${id}">${textoServico}</option>`;
     });
     sel.value = valorAtual;
   });
