@@ -362,7 +362,7 @@ async function gerarHorarios(bloco) {
     grid.innerHTML = "Carregando...";
 
     // Duração: flex usa serviço real, plano normal usa 30min, avulso usa duracao do serviço
-    let duracaoServico = 30;
+    let duracaoServico = 20;
     if (servId.startsWith('__flex__') && assinaturaAtiva?.servicosFlex) {
         const flexKey = servId.replace('__flex__', '');
         const sfId = assinaturaAtiva.servicosFlex[flexKey]?.servicoId;
@@ -370,7 +370,7 @@ async function gerarHorarios(bloco) {
             duracaoServico = Number(servicosDisponiveis[sfId].duracao) || 20;
         }
     } else if (servId === '__plano__') {
-        duracaoServico = 30;
+        duracaoServico = 20;
     } else if (servicosDisponiveis[servId]) {
         duracaoServico = Number(servicosDisponiveis[servId].duracao) || 20;
     }
