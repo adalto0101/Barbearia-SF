@@ -338,7 +338,7 @@
           planoPreco: planoSelecionado.preco,
           adicionais: planoSelecionado.adicionais || [],
           servicoId: planoSelecionado.servicoId || null,
-          maxUsosMes: 4,
+          maxUsosMes: Number(planoSelecionado.maxUsosMes) || 4,
           status: 'pendente',
           criadoEm: Date.now(),
           usosNoMes: {},
