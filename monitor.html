@@ -29,6 +29,18 @@
     text-transform:uppercase; color:var(--gold);
   }
   .relogio{text-align:right}
+  .header-dir{display:flex;align-items:center;gap:2vw}
+  .btn-girar{
+    background:transparent;border:1px solid var(--line);color:var(--gold);
+    width:6vh;height:6vh;min-width:40px;min-height:40px;border-radius:12px;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+    transition:background .2s,border-color .2s,transform .2s;
+  }
+  .btn-girar:hover{background:var(--panel);border-color:var(--gold-dim)}
+  .btn-girar:active{transform:scale(.9)}
+  .btn-girar svg{width:60%;height:60%}
+  .btn-girar.girando svg{animation:girar .6s ease}
+  @keyframes girar{from{transform:rotate(0)}to{transform:rotate(360deg)}}
   .relogio .hora{
     font-size:5vh; font-weight:800; font-variant-numeric:tabular-nums;
     letter-spacing:2px; line-height:1;
@@ -41,10 +53,10 @@
   /* PRÓXIMO CLIENTE (destaque) */
   .agora{
     padding:4vh 3vw; display:flex; flex-direction:column; justify-content:center;
-    border-right:1px solid var(--line); position:relative;
+    border-right:1px solid var(--line); position:relative; min-width:0;
   }
   .agora .eyebrow{
-    font-size:1.9vh; letter-spacing:4px; text-transform:uppercase;
+    font-size:clamp(13px,1.9vh,26px); letter-spacing:4px; text-transform:uppercase;
     color:var(--gold); margin-bottom:2vh; display:flex;align-items:center;gap:12px;
   }
   .dot{width:12px;height:12px;border-radius:50%;background:var(--green);
@@ -55,18 +67,19 @@
     100%{box-shadow:0 0 0 0 rgba(46,204,113,0)}
   }
   .agora .hora-grande{
-    font-size:14vh; font-weight:800; line-height:.9;
+    font-size:min(18vw,14vh); font-weight:800; line-height:.9;
     font-variant-numeric:tabular-nums; letter-spacing:-2px;
+    transition:font-size .3s ease;
   }
-  .agora .nome{font-size:6vh;font-weight:700;margin-top:1vh;text-transform:uppercase}
-  .agora .servico{font-size:3vh;color:var(--muted);margin-top:1vh}
+  .agora .nome{font-size:min(9vw,6vh);font-weight:700;margin-top:1vh;text-transform:uppercase;word-break:break-word;transition:font-size .3s ease}
+  .agora .servico{font-size:min(4.5vw,3vh);color:var(--muted);margin-top:1vh}
   .agora .badge{
-    display:inline-block;margin-top:2.5vh;font-size:1.8vh;font-weight:700;
+    display:inline-block;margin-top:2.5vh;font-size:clamp(12px,1.8vh,24px);font-weight:700;
     background:var(--gold);color:#000;padding:6px 16px;border-radius:20px;
     letter-spacing:1px;width:fit-content;
   }
-  .agora.vazio .hora-grande{font-size:7vh;color:var(--muted)}
-  .agora.vazio .nome{font-size:3vh;color:var(--muted);font-weight:400}
+  .agora.vazio .hora-grande{font-size:min(11vw,7vh);color:var(--muted)}
+  .agora.vazio .nome{font-size:min(4.5vw,3vh);color:var(--muted);font-weight:400}
 
   /* FILA DO DIA */
   .fila{padding:3vh 2.5vw;display:flex;flex-direction:column;min-height:0}
@@ -82,13 +95,13 @@
     border-radius:10px;padding:1.8vh 2vw;flex-shrink:0;
   }
   .card .h{
-    font-size:3.6vh;font-weight:800;font-variant-numeric:tabular-nums;
+    font-size:min(6vw,3.6vh);font-weight:800;font-variant-numeric:tabular-nums;
     color:var(--gold);min-width:5ch;
   }
   .card .info{flex:1;min-width:0}
-  .card .info .c{font-size:2.8vh;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase}
-  .card .info .s{font-size:1.9vh;color:var(--muted);margin-top:2px}
-  .card .plano{font-size:1.5vh;font-weight:700;background:var(--gold);color:#000;padding:3px 10px;border-radius:12px}
+  .card .info .c{font-size:min(4.5vw,2.8vh);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase}
+  .card .info .s{font-size:min(3vw,1.9vh);color:var(--muted);margin-top:2px}
+  .card .plano{font-size:min(2.4vw,1.5vh);font-weight:700;background:var(--gold);color:#000;padding:3px 10px;border-radius:12px;white-space:nowrap}
   .card.proximo{border-left-color:var(--green)}
   .card.proximo .h{color:var(--green)}
 
@@ -110,6 +123,44 @@
   .status-conexao{display:flex;align-items:center;gap:8px}
   .status-conexao .d{width:8px;height:8px;border-radius:50%;background:var(--green)}
   .status-conexao.off .d{background:#e74c3c}
+
+  /* ═══ ORIENTAÇÃO RETRATO (tela em pé) ═══ */
+  /* Vale automaticamente em tela física vertical, OU quando forçado pelo botão. */
+  @media (orientation: portrait){
+    body:not(.forcar-paisagem) main{grid-template-columns:1fr;grid-template-rows:auto 1fr}
+    body:not(.forcar-paisagem) .agora{border-right:none;border-bottom:1px solid var(--line);padding:3vh 5vw}
+    body:not(.forcar-paisagem) .agora .hora-grande{font-size:22vw}
+    body:not(.forcar-paisagem) .agora .nome{font-size:9vw}
+    body:not(.forcar-paisagem) .agora .servico{font-size:4.5vw}
+    body:not(.forcar-paisagem) .agora.vazio .hora-grande{font-size:16vw}
+    body:not(.forcar-paisagem) .agora.vazio .nome{font-size:5vw}
+    body:not(.forcar-paisagem) .fila{padding:3vh 5vw}
+    body:not(.forcar-paisagem) .card .h{font-size:6vw}
+    body:not(.forcar-paisagem) .card .info .c{font-size:5vw}
+    body:not(.forcar-paisagem) .card .info .s{font-size:3.4vw}
+    body:not(.forcar-paisagem) .card .plano{font-size:2.8vw}
+    body:not(.forcar-paisagem) .relogio .hora{font-size:6vw}
+    body:not(.forcar-paisagem) .marca h1{font-size:3.6vw}
+  }
+
+  /* Retrato FORÇADO pelo botão (mesmo em tela física horizontal) */
+  body.forcar-retrato main{grid-template-columns:1fr;grid-template-rows:auto 1fr}
+  body.forcar-retrato .agora{border-right:none;border-bottom:1px solid var(--line);padding:3vh 5vw}
+  body.forcar-retrato .fila{padding:3vh 5vw}
+
+  /* ═══ TELAS PEQUENAS (celular) ═══ */
+  @media (max-width:600px){
+    header{padding:12px 16px}
+    .marca img{height:32px}
+    .marca h1{font-size:14px}
+    .relogio .hora{font-size:26px}
+    .relogio .data{font-size:12px}
+    footer{font-size:11px;padding:8px 16px}
+  }
+
+  /* Animação de troca de orientação */
+  main{transition:opacity .25s ease}
+  main.trocando{opacity:0;transform:scale(.98)}
 </style>
 </head>
 <body>
@@ -118,9 +169,19 @@
       <img src="logo.png" alt="" onerror="this.style.display='none'">
       <h1>Barbearia SF</h1>
     </div>
-    <div class="relogio">
-      <div class="hora" id="relogio-hora">--:--</div>
-      <div class="data" id="relogio-data">—</div>
+    <div class="header-dir">
+      <button id="btn-girar" class="btn-girar" title="Girar tela" aria-label="Girar orientação da tela">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 4v5h5"></path>
+          <path d="M20 20v-5h-5"></path>
+          <path d="M4 9a8 8 0 0 1 14-3"></path>
+          <path d="M20 15a8 8 0 0 1-14 3"></path>
+        </svg>
+      </button>
+      <div class="relogio">
+        <div class="hora" id="relogio-hora">--:--</div>
+        <div class="data" id="relogio-data">—</div>
+      </div>
     </div>
   </header>
 
@@ -206,15 +267,18 @@ function marcarConexao(ok){
 }
 
 function render(){
-  const agora = minutos(`${new Date().getHours()}:${new Date().getMinutes()}`);
-  // futuros = ainda não terminaram (hora + duração > agora)
-  const futuros = agendamentosDia.filter(a => (minutos(a.hora) + (a.duracao||20)) > agora);
+  const d = new Date();
+  const agora = d.getHours()*60 + d.getMinutes();
+  // ainda relevantes hoje = não terminaram (início + duração > agora)
+  const ativos = agendamentosDia.filter(a => (minutos(a.hora) + (a.duracao||20)) > agora);
 
   const painel = document.getElementById('painel-agora');
   const fila = document.getElementById('fila');
+  const eyebrow = painel.querySelector('.eyebrow');
 
-  if (futuros.length === 0){
+  if (ativos.length === 0){
     painel.classList.add('vazio');
+    if (eyebrow) eyebrow.innerHTML = '<span class="dot"></span> Encerrado';
     document.getElementById('ag-hora').textContent = '✓';
     document.getElementById('ag-nome').textContent = 'Dia encerrado';
     document.getElementById('ag-servico').textContent = 'Nenhum atendimento restante';
@@ -225,25 +289,37 @@ function render(){
     return;
   }
 
-  // próximo cliente em destaque
-  const prox = futuros[0];
+  // Alguém está sendo atendido agora? (já começou E ainda não terminou)
+  const emAtendimento = ativos.find(a => {
+    const ini = minutos(a.hora);
+    return ini <= agora && (ini + (a.duracao||20)) > agora;
+  });
+
+  // destaque = quem está na cadeira; se ninguém, o próximo a chegar
+  const destaque = emAtendimento || ativos[0];
   painel.classList.remove('vazio');
-  document.getElementById('ag-hora').textContent = prox.hora;
-  document.getElementById('ag-nome').textContent = prox.cliente || '—';
+  if (eyebrow){
+    eyebrow.innerHTML = emAtendimento
+      ? '<span class="dot"></span> Em atendimento'
+      : '<span class="dot"></span> Próximo cliente';
+  }
+  document.getElementById('ag-hora').textContent = destaque.hora;
+  document.getElementById('ag-nome').textContent = destaque.cliente || '—';
   document.getElementById('ag-servico').textContent =
-    `${prox.servicoNome || 'Atendimento'} · ${prox.duracao||20} min`;
+    `${destaque.servicoNome || 'Atendimento'} · ${destaque.duracao||20} min`;
   const badge = document.getElementById('ag-badge');
-  if (prox.ehPlano){
+  if (destaque.ehPlano){
     badge.style.display = 'inline-block';
-    badge.textContent = prox.planoNome ? `PLANO · ${prox.planoNome}` : 'PLANO';
+    badge.textContent = destaque.planoNome ? `PLANO · ${destaque.planoNome}` : 'PLANO';
   } else {
     badge.style.display = 'none';
   }
 
-  // fila = do 2º em diante, com intervalos entre eles
-  const resto = futuros.slice(1);
+  // fila = todos os ativos que não são o destaque, em ordem
+  const resto = ativos.filter(a => a !== destaque);
   fila.innerHTML = '';
-  let fimAnterior = minutos(prox.hora) + (prox.duracao||20);
+  // ponto de partida dos intervalos: fim do que está em atendimento, ou "agora"
+  let fimAnterior = Math.max(agora, minutos(destaque.hora) + (destaque.duracao||20));
 
   if (resto.length === 0){
     fila.innerHTML = '<div class="vazio-fila">Esse é o último de hoje.</div>';
@@ -273,11 +349,34 @@ function render(){
   });
 
   document.getElementById('resumo-dia').textContent =
-    `${futuros.length} restante(s) · ${agendamentosDia.length} no total hoje`;
+    `${ativos.length} restante(s) · ${agendamentosDia.length} no total hoje`;
 }
 
-// re-render a cada minuto para atualizar "próximo" conforme o tempo passa
-setInterval(render, 60000);
+// ── Botão de girar orientação ──
+const btnGirar = document.getElementById('btn-girar');
+const mainEl = document.querySelector('main');
+btnGirar.addEventListener('click', () => {
+  const body = document.body;
+  // Descobre a orientação efetiva atual (física ou já forçada)
+  const ehRetratoAgora = body.classList.contains('forcar-retrato') ||
+    (!body.classList.contains('forcar-paisagem') && window.matchMedia('(orientation: portrait)').matches);
+
+  // animação: apaga, troca, reacende
+  btnGirar.classList.remove('girando');
+  void btnGirar.offsetWidth; // reinicia a animação
+  btnGirar.classList.add('girando');
+  mainEl.classList.add('trocando');
+
+  setTimeout(() => {
+    body.classList.remove('forcar-retrato', 'forcar-paisagem');
+    body.classList.add(ehRetratoAgora ? 'forcar-paisagem' : 'forcar-retrato');
+    render(); // recalcula tamanhos da fila para a nova orientação
+    mainEl.classList.remove('trocando');
+  }, 250);
+});
+
+// re-render a cada 30s para acompanhar o tempo passar
+setInterval(render, 30000);
 </script>
 </body>
 </html>
