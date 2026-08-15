@@ -342,19 +342,37 @@ function render(){
     return;
   }
 
-  // Alguém está sendo atendido agora? (já começou E ainda não terminou)
+  // Quem está sendo atendido agora (já começou e não terminou) — sai do painel e da fila
   const emAtendimento = ativos.find(a => {
     const ini = minutos(a.hora);
     return ini <= agora && (ini + (a.duracao||20)) > agora;
   });
 
-  // destaque = quem está na cadeira; se ninguém, o próximo a chegar
-  const destaque = emAtendimento || ativos[0];
+  // Próximos = os que ainda NÃO começaram
+  const proximos = ativos.filter(a => minutos(a.hora) > agora);
+
+  if (proximos.length === 0){
+    // ninguém à frente: só há quem está na cadeira (ou nada)
+    painel.classList.add('vazio');
+    if (eyebrow) eyebrow.innerHTML = '<span class="dot"></span> Próximo cliente';
+    document.getElementById('ag-hora').textContent = '—';
+    document.getElementById('ag-nome').textContent = emAtendimento ? 'Sem próximos na fila' : 'Dia encerrado';
+    document.getElementById('ag-servico').textContent = emAtendimento
+      ? `Em atendimento agora: ${emAtendimento.cliente}` : '';
+    document.getElementById('ag-badge').style.display = 'none';
+    fila.innerHTML = '<div class="vazio-fila">Nenhum próximo agendamento.</div>';
+    document.getElementById('resumo-dia').textContent =
+      `${ativos.length} restante(s) · ${agendamentosDia.length} no total hoje`;
+    renderLivres();
+    setTimeout(iniciarAutoScroll, 100);
+    return;
+  }
+
+  // destaque = o PRÓXIMO cliente (nunca quem está na cadeira)
+  const destaque = proximos[0];
   painel.classList.remove('vazio');
   if (eyebrow){
-    eyebrow.innerHTML = emAtendimento
-      ? '<span class="dot"></span> Em atendimento'
-      : '<span class="dot"></span> Próximo cliente';
+    eyebrow.innerHTML = '<span class="dot"></span> Próximo cliente';
   }
   document.getElementById('ag-hora').textContent = destaque.hora;
   document.getElementById('ag-nome').textContent = destaque.cliente || '—';
@@ -368,11 +386,11 @@ function render(){
     badge.style.display = 'none';
   }
 
-  // fila = todos os ativos que não são o destaque, em ordem
-  const resto = ativos.filter(a => a !== destaque);
+  // fila = os próximos depois do destaque (quem está em atendimento não entra)
+  const resto = proximos.filter(a => a !== destaque);
   fila.innerHTML = '';
-  // ponto de partida dos intervalos: fim do que está em atendimento, ou "agora"
-  let fimAnterior = Math.max(agora, minutos(destaque.hora) + (destaque.duracao||20));
+  // intervalos a partir do fim do destaque
+  let fimAnterior = minutos(destaque.hora) + (destaque.duracao||20);
 
   if (resto.length === 0){
     fila.innerHTML = '<div class="vazio-fila">Esse é o último de hoje.</div>';
