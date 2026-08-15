@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monitor — Barbearia SF</title>
+<style>
+  :root{
+    --bg:#0d0d0f; --panel:#16161a; --line:#26262c;
+    --gold:#d4af37; --gold-dim:#8a7327;
+    --txt:#f4f2ea; --muted:#8a8a92; --green:#2ecc71; --gap:#e67e22;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    background:var(--bg); color:var(--txt);
+    font-family:'Segoe UI',system-ui,sans-serif;
+    display:flex; flex-direction:column; overflow:hidden;
+  }
+  /* ── CABEÇALHO ── */
+  header{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:2vh 3vw; border-bottom:1px solid var(--line);
+  }
+  .marca{display:flex;align-items:center;gap:14px}
+  .marca img{height:5vh}
+  .marca h1{
+    font-size:2.4vh; letter-spacing:3px; font-weight:700;
+    text-transform:uppercase; color:var(--gold);
+  }
+  .relogio{text-align:right}
+  .relogio .hora{
+    font-size:5vh; font-weight:800; font-variant-numeric:tabular-nums;
+    letter-spacing:2px; line-height:1;
+  }
+  .relogio .data{font-size:2vh;color:var(--muted);text-transform:capitalize;margin-top:4px}
+
+  /* ── CORPO ── */
+  main{flex:1;display:grid;grid-template-columns:1.1fr 0.9fr;gap:0;min-height:0}
+
+  /* PRÓXIMO CLIENTE (destaque) */
+  .agora{
+    padding:4vh 3vw; display:flex; flex-direction:column; justify-content:center;
+    border-right:1px solid var(--line); position:relative;
+  }
+  .agora .eyebrow{
+    font-size:1.9vh; letter-spacing:4px; text-transform:uppercase;
+    color:var(--gold); margin-bottom:2vh; display:flex;align-items:center;gap:12px;
+  }
+  .dot{width:12px;height:12px;border-radius:50%;background:var(--green);
+    box-shadow:0 0 0 0 rgba(46,204,113,.6);animation:pulse 2s infinite}
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(46,204,113,.5)}
+    70%{box-shadow:0 0 0 18px rgba(46,204,113,0)}
+    100%{box-shadow:0 0 0 0 rgba(46,204,113,0)}
+  }
+  .agora .hora-grande{
+    font-size:14vh; font-weight:800; line-height:.9;
+    font-variant-numeric:tabular-nums; letter-spacing:-2px;
+  }
+  .agora .nome{font-size:6vh;font-weight:700;margin-top:1vh;text-transform:uppercase}
+  .agora .servico{font-size:3vh;color:var(--muted);margin-top:1vh}
+  .agora .badge{
+    display:inline-block;margin-top:2.5vh;font-size:1.8vh;font-weight:700;
+    background:var(--gold);color:#000;padding:6px 16px;border-radius:20px;
+    letter-spacing:1px;width:fit-content;
+  }
+  .agora.vazio .hora-grande{font-size:7vh;color:var(--muted)}
+  .agora.vazio .nome{font-size:3vh;color:var(--muted);font-weight:400}
+
+  /* FILA DO DIA */
+  .fila{padding:3vh 2.5vw;display:flex;flex-direction:column;min-height:0}
+  .fila h2{
+    font-size:1.9vh;letter-spacing:3px;text-transform:uppercase;
+    color:var(--muted);margin-bottom:2vh;flex-shrink:0;
+  }
+  .fila-scroll{overflow:hidden;flex:1;display:flex;flex-direction:column;gap:1.2vh}
+  .card{
+    display:flex;align-items:center;gap:2vw;
+    background:var(--panel);border:1px solid var(--line);
+    border-left:4px solid var(--gold-dim);
+    border-radius:10px;padding:1.8vh 2vw;flex-shrink:0;
+  }
+  .card .h{
+    font-size:3.6vh;font-weight:800;font-variant-numeric:tabular-nums;
+    color:var(--gold);min-width:5ch;
+  }
+  .card .info{flex:1;min-width:0}
+  .card .info .c{font-size:2.8vh;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase}
+  .card .info .s{font-size:1.9vh;color:var(--muted);margin-top:2px}
+  .card .plano{font-size:1.5vh;font-weight:700;background:var(--gold);color:#000;padding:3px 10px;border-radius:12px}
+  .card.proximo{border-left-color:var(--green)}
+  .card.proximo .h{color:var(--green)}
+
+  /* INTERVALO (lacuna) */
+  .intervalo{
+    display:flex;align-items:center;gap:1vw;
+    padding:.6vh 2vw;color:var(--gap);flex-shrink:0;
+    font-size:1.7vh;letter-spacing:1px;
+  }
+  .intervalo .barra{flex:1;height:1px;background:repeating-linear-gradient(90deg,var(--gap) 0 8px,transparent 8px 16px);opacity:.5}
+
+  .vazio-fila{color:var(--muted);font-size:2.4vh;text-align:center;margin-top:6vh}
+
+  footer{
+    padding:1.4vh 3vw;border-top:1px solid var(--line);
+    display:flex;justify-content:space-between;align-items:center;
+    font-size:1.6vh;color:var(--muted);flex-shrink:0;
+  }
+  .status-conexao{display:flex;align-items:center;gap:8px}
+  .status-conexao .d{width:8px;height:8px;border-radius:50%;background:var(--green)}
+  .status-conexao.off .d{background:#e74c3c}
+</style>
+</head>
+<body>
+  <header>
+    <div class="marca">
+      <img src="logo.png" alt="" onerror="this.style.display='none'">
+      <h1>Barbearia SF</h1>
+    </div>
+    <div class="relogio">
+      <div class="hora" id="relogio-hora">--:--</div>
+      <div class="data" id="relogio-data">—</div>
+    </div>
+  </header>
+
+  <main>
+    <section class="agora vazio" id="painel-agora">
+      <div class="eyebrow"><span class="dot"></span> Próximo cliente</div>
+      <div class="hora-grande" id="ag-hora">--:--</div>
+      <div class="nome" id="ag-nome">Sem agendamentos</div>
+      <div class="servico" id="ag-servico"></div>
+      <span class="badge" id="ag-badge" style="display:none"></span>
+    </section>
+
+    <section class="fila">
+      <h2>Ainda hoje</h2>
+      <div class="fila-scroll" id="fila"></div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="status-conexao" id="conexao"><span class="d"></span> <span id="conexao-txt">Conectando…</span></div>
+    <div id="resumo-dia">—</div>
+  </footer>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyC1mkw9lTCa1khBcTNBHf4nC_MkC9lECIk",
+  authDomain: "barbearia-sf1-0.firebaseapp.com",
+  databaseURL: "https://barbearia-sf1-0-default-rtdb.firebaseio.com",
+  projectId: "barbearia-sf1-0",
+  storageBucket: "barbearia-sf1-0.firebasestorage.app",
+  messagingSenderId: "638200163686",
+  appId: "1:638200163686:web:d6e615289d181b9da62ca7"
+};
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const DIAS = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
+const MESES = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+
+// helpers
+const hojeStr = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+};
+const minutos = (hhmm) => {
+  const [h,m] = (hhmm||'0:0').split(':').map(Number);
+  return (h||0)*60 + (m||0);
+};
+const paraHHMM = (min) => `${String(Math.floor(min/60)).padStart(2,'0')}:${String(min%60).padStart(2,'0')}`;
+
+// relógio
+function tickRelogio(){
+  const d = new Date();
+  document.getElementById('relogio-hora').textContent =
+    `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  document.getElementById('relogio-data').textContent =
+    `${DIAS[d.getDay()]}, ${d.getDate()} de ${MESES[d.getMonth()]}`;
+}
+tickRelogio();
+setInterval(tickRelogio, 1000);
+
+let agendamentosDia = [];
+
+// escuta o Firebase
+onValue(ref(db, 'agendamentos'), (snap) => {
+  marcarConexao(true);
+  const dados = snap.val() || {};
+  const hoje = hojeStr();
+  agendamentosDia = Object.entries(dados)
+    .map(([id,a]) => ({ id, ...a }))
+    .filter(a => a && a.data === hoje && a.cliente !== 'BLOQUEADO')
+    .sort((a,b) => minutos(a.hora) - minutos(b.hora));
+  render();
+}, (err) => { console.error(err); marcarConexao(false); });
+
+function marcarConexao(ok){
+  const el = document.getElementById('conexao');
+  el.classList.toggle('off', !ok);
+  document.getElementById('conexao-txt').textContent = ok ? 'Ao vivo' : 'Sem conexão';
+}
+
+function render(){
+  const agora = minutos(`${new Date().getHours()}:${new Date().getMinutes()}`);
+  // futuros = ainda não terminaram (hora + duração > agora)
+  const futuros = agendamentosDia.filter(a => (minutos(a.hora) + (a.duracao||20)) > agora);
+
+  const painel = document.getElementById('painel-agora');
+  const fila = document.getElementById('fila');
+
+  if (futuros.length === 0){
+    painel.classList.add('vazio');
+    document.getElementById('ag-hora').textContent = '✓';
+    document.getElementById('ag-nome').textContent = 'Dia encerrado';
+    document.getElementById('ag-servico').textContent = 'Nenhum atendimento restante';
+    document.getElementById('ag-badge').style.display = 'none';
+    fila.innerHTML = '<div class="vazio-fila">Sem próximos agendamentos hoje.</div>';
+    document.getElementById('resumo-dia').textContent =
+      `${agendamentosDia.length} atendimento(s) hoje`;
+    return;
+  }
+
+  // próximo cliente em destaque
+  const prox = futuros[0];
+  painel.classList.remove('vazio');
+  document.getElementById('ag-hora').textContent = prox.hora;
+  document.getElementById('ag-nome').textContent = prox.cliente || '—';
+  document.getElementById('ag-servico').textContent =
+    `${prox.servicoNome || 'Atendimento'} · ${prox.duracao||20} min`;
+  const badge = document.getElementById('ag-badge');
+  if (prox.ehPlano){
+    badge.style.display = 'inline-block';
+    badge.textContent = prox.planoNome ? `PLANO · ${prox.planoNome}` : 'PLANO';
+  } else {
+    badge.style.display = 'none';
+  }
+
+  // fila = do 2º em diante, com intervalos entre eles
+  const resto = futuros.slice(1);
+  fila.innerHTML = '';
+  let fimAnterior = minutos(prox.hora) + (prox.duracao||20);
+
+  if (resto.length === 0){
+    fila.innerHTML = '<div class="vazio-fila">Esse é o último de hoje.</div>';
+  }
+
+  resto.forEach((a, i) => {
+    const ini = minutos(a.hora);
+    const folga = ini - fimAnterior;
+    // mostra intervalo se houver folga significativa (>= 10 min)
+    if (folga >= 10){
+      const div = document.createElement('div');
+      div.className = 'intervalo';
+      div.innerHTML = `<span>⏸ intervalo ${folga} min</span><span class="barra"></span><span>${paraHHMM(fimAnterior)}–${a.hora}</span>`;
+      fila.appendChild(div);
+    }
+    const card = document.createElement('div');
+    card.className = 'card' + (i === 0 ? ' proximo' : '');
+    card.innerHTML = `
+      <div class="h">${a.hora}</div>
+      <div class="info">
+        <div class="c">${a.cliente || '—'}</div>
+        <div class="s">${a.servicoNome || 'Atendimento'} · ${a.duracao||20} min</div>
+      </div>
+      ${a.ehPlano ? '<span class="plano">PLANO</span>' : ''}`;
+    fila.appendChild(card);
+    fimAnterior = ini + (a.duracao||20);
+  });
+
+  document.getElementById('resumo-dia').textContent =
+    `${futuros.length} restante(s) · ${agendamentosDia.length} no total hoje`;
+}
+
+// re-render a cada minuto para atualizar "próximo" conforme o tempo passa
+setInterval(render, 60000);
+</script>
+</body>
+</html>
