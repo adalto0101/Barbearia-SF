@@ -67,19 +67,19 @@
     100%{box-shadow:0 0 0 0 rgba(46,204,113,0)}
   }
   .agora .hora-grande{
-    font-size:min(18vw,14vh); font-weight:800; line-height:.9;
+    font-size:clamp(90px,20vh,240px); font-weight:800; line-height:.9;
     font-variant-numeric:tabular-nums; letter-spacing:-2px;
     transition:font-size .3s ease;
   }
-  .agora .nome{font-size:min(9vw,6vh);font-weight:700;margin-top:1vh;text-transform:uppercase;word-break:break-word;transition:font-size .3s ease}
-  .agora .servico{font-size:min(4.5vw,3vh);color:var(--muted);margin-top:1vh}
+  .agora .nome{font-size:clamp(40px,9vh,110px);font-weight:700;margin-top:1vh;text-transform:uppercase;word-break:break-word;line-height:1;transition:font-size .3s ease}
+  .agora .servico{font-size:clamp(20px,4vh,48px);color:var(--muted);margin-top:1.5vh}
   .agora .badge{
-    display:inline-block;margin-top:2.5vh;font-size:clamp(12px,1.8vh,24px);font-weight:700;
+    display:inline-block;margin-top:2.5vh;font-size:clamp(14px,2.2vh,28px);font-weight:700;
     background:var(--gold);color:#000;padding:6px 16px;border-radius:20px;
     letter-spacing:1px;width:fit-content;
   }
-  .agora.vazio .hora-grande{font-size:min(11vw,7vh);color:var(--muted)}
-  .agora.vazio .nome{font-size:min(4.5vw,3vh);color:var(--muted);font-weight:400}
+  .agora.vazio .hora-grande{font-size:clamp(60px,12vh,140px);color:var(--muted)}
+  .agora.vazio .nome{font-size:clamp(24px,5vh,56px);color:var(--muted);font-weight:400}
 
   /* FILA DO DIA */
   .fila{padding:3vh 2.5vw;display:flex;flex-direction:column;min-height:0}
@@ -87,21 +87,21 @@
     font-size:1.9vh;letter-spacing:3px;text-transform:uppercase;
     color:var(--muted);margin-bottom:2vh;flex-shrink:0;
   }
-  .fila-scroll{overflow:hidden;flex:1;display:flex;flex-direction:column;gap:1.2vh}
+  .fila-scroll{overflow:hidden;flex:1;display:flex;flex-direction:column;gap:1.4vh}
   .card{
     display:flex;align-items:center;gap:2vw;
     background:var(--panel);border:1px solid var(--line);
-    border-left:4px solid var(--gold-dim);
-    border-radius:10px;padding:1.8vh 2vw;flex-shrink:0;
+    border-left:5px solid var(--gold-dim);
+    border-radius:12px;padding:2vh 2vw;flex-shrink:0;
   }
   .card .h{
-    font-size:min(6vw,3.6vh);font-weight:800;font-variant-numeric:tabular-nums;
+    font-size:clamp(22px,4vh,52px);font-weight:800;font-variant-numeric:tabular-nums;
     color:var(--gold);min-width:5ch;
   }
   .card .info{flex:1;min-width:0}
-  .card .info .c{font-size:min(4.5vw,2.8vh);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase}
-  .card .info .s{font-size:min(3vw,1.9vh);color:var(--muted);margin-top:2px}
-  .card .plano{font-size:min(2.4vw,1.5vh);font-weight:700;background:var(--gold);color:#000;padding:3px 10px;border-radius:12px;white-space:nowrap}
+  .card .info .c{font-size:clamp(18px,3.2vh,42px);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase}
+  .card .info .s{font-size:clamp(13px,2.1vh,26px);color:var(--muted);margin-top:2px}
+  .card .plano{font-size:clamp(11px,1.6vh,20px);font-weight:700;background:var(--gold);color:#000;padding:4px 12px;border-radius:12px;white-space:nowrap}
   .card.proximo{border-left-color:var(--green)}
   .card.proximo .h{color:var(--green)}
 
@@ -158,6 +158,42 @@
     footer{font-size:11px;padding:8px 16px}
   }
 
+  /* ═══ PAISAGEM: preencher a altura, nada de espaço morto ═══ */
+  /* tela física horizontal (não forçada a retrato) OU forçada a paisagem */
+  @media (orientation: landscape){
+    body:not(.forcar-retrato) .fila-scroll{justify-content:flex-start;gap:1.6vh}
+    body:not(.forcar-retrato) .fila-scroll .card{
+      flex:1 1 0;min-height:0;padding:0 2vw;
+    }
+    /* garante fonte grande nos cartões usando a altura da tela */
+    body:not(.forcar-retrato) .card .h{font-size:clamp(28px,5vh,60px)}
+    body:not(.forcar-retrato) .card .info .c{font-size:clamp(22px,4vh,48px)}
+    body:not(.forcar-retrato) .card .info .s{font-size:clamp(15px,2.4vh,30px)}
+    body:not(.forcar-retrato) .agora{justify-content:center}
+  }
+  body.forcar-paisagem .fila-scroll{justify-content:flex-start;gap:1.6vh}
+  body.forcar-paisagem .fila-scroll .card{flex:1 1 0;min-height:0;padding:0 2vw}
+
+  /* ═══ FAIXA DE HORÁRIOS LIVRES ═══ */
+  .livres{
+    border-top:1px solid var(--line);
+    padding:1.6vh 3vw;display:flex;align-items:center;gap:2vw;flex-shrink:0;
+    background:rgba(255,255,255,.02);
+  }
+  .livres-titulo{
+    font-size:clamp(12px,1.9vh,22px);letter-spacing:2px;text-transform:uppercase;
+    color:var(--muted);white-space:nowrap;flex-shrink:0;
+  }
+  .livres-lista{
+    display:flex;gap:.8vw;flex-wrap:wrap;overflow:hidden;flex:1;
+  }
+  .slot-livre{
+    font-size:clamp(14px,2.4vh,30px);font-weight:700;font-variant-numeric:tabular-nums;
+    color:var(--green);border:1px solid rgba(46,204,113,.35);
+    background:rgba(46,204,113,.08);border-radius:8px;padding:.5vh 1vw;white-space:nowrap;
+  }
+  .livres-vazio{color:var(--muted);font-size:clamp(13px,2vh,24px)}
+
   /* Animação de troca de orientação */
   main{transition:opacity .25s ease}
   main.trocando{opacity:0;transform:scale(.98)}
@@ -199,6 +235,11 @@
       <div class="fila-scroll" id="fila"></div>
     </section>
   </main>
+
+  <section class="livres" id="secao-livres">
+    <div class="livres-titulo">Horários livres hoje</div>
+    <div class="livres-lista" id="livres-lista"></div>
+  </section>
 
   <footer>
     <div class="status-conexao" id="conexao"><span class="d"></span> <span id="conexao-txt">Conectando…</span></div>
@@ -246,17 +287,27 @@ function tickRelogio(){
 tickRelogio();
 setInterval(tickRelogio, 1000);
 
-let agendamentosDia = [];
+let agendamentosDia = [];      // só clientes reais (para a fila)
+let ocupadosDia = [];          // todos, incluindo BLOQUEADO (para calcular livres)
+let horariosFuncionamento = null;
+
+// horário de funcionamento (para saber abertura/fechamento do dia)
+onValue(ref(db, 'horarios_funcionamento'), (snap) => {
+  horariosFuncionamento = snap.val() || {};
+  render();
+}, (err) => console.error(err));
 
 // escuta o Firebase
 onValue(ref(db, 'agendamentos'), (snap) => {
   marcarConexao(true);
   const dados = snap.val() || {};
   const hoje = hojeStr();
-  agendamentosDia = Object.entries(dados)
+  const doDia = Object.entries(dados)
     .map(([id,a]) => ({ id, ...a }))
-    .filter(a => a && a.data === hoje && a.cliente !== 'BLOQUEADO')
+    .filter(a => a && a.data === hoje)
     .sort((a,b) => minutos(a.hora) - minutos(b.hora));
+  ocupadosDia = doDia; // inclui bloqueios
+  agendamentosDia = doDia.filter(a => a.cliente !== 'BLOQUEADO');
   render();
 }, (err) => { console.error(err); marcarConexao(false); });
 
@@ -286,6 +337,7 @@ function render(){
     fila.innerHTML = '<div class="vazio-fila">Sem próximos agendamentos hoje.</div>';
     document.getElementById('resumo-dia').textContent =
       `${agendamentosDia.length} atendimento(s) hoje`;
+    renderLivres();
     return;
   }
 
@@ -350,6 +402,7 @@ function render(){
 
   document.getElementById('resumo-dia').textContent =
     `${ativos.length} restante(s) · ${agendamentosDia.length} no total hoje`;
+  renderLivres();
 }
 
 // ── Botão de girar orientação ──
@@ -374,6 +427,46 @@ btnGirar.addEventListener('click', () => {
     mainEl.classList.remove('trocando');
   }, 250);
 });
+
+// ── Horários livres de hoje ──
+function renderLivres(){
+  const lista = document.getElementById('livres-lista');
+  if (!horariosFuncionamento){ lista.innerHTML = ''; return; }
+
+  const d = new Date();
+  const agora = d.getHours()*60 + d.getMinutes();
+  // chave do dia da semana no formato do banco
+  const chaveDia = ['domingo','segunda','terça','quarta','quinta','sexta','sábado'][d.getDay()];
+  const config = horariosFuncionamento[chaveDia];
+
+  if (!config || config.fechado){
+    lista.innerHTML = '<span class="livres-vazio">Fechado hoje</span>';
+    return;
+  }
+
+  const abertura = minutos(config.inicio);
+  const fechamento = minutos(config.fim);
+  const SLOT = 20; // mesmo passo do agendamento
+
+  const livres = [];
+  for (let t = abertura; t <= fechamento; t += SLOT){
+    if (t <= agora) continue; // já passou
+    const fimSlot = t + SLOT;
+    // ocupado se conflita com qualquer agendamento OU bloqueio
+    const ocupado = ocupadosDia.some(a => {
+      const ini = minutos(a.hora);
+      const fim = ini + (Number(a.duracao) || 20);
+      return t < fim && fimSlot > ini;
+    });
+    if (!ocupado) livres.push(paraHHMM(t));
+  }
+
+  if (livres.length === 0){
+    lista.innerHTML = '<span class="livres-vazio">Nenhum horário livre restante hoje</span>';
+    return;
+  }
+  lista.innerHTML = livres.map(h => `<span class="slot-livre">${h}</span>`).join('');
+}
 
 // re-render a cada 30s para acompanhar o tempo passar
 setInterval(render, 30000);
