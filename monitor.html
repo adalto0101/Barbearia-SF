@@ -195,6 +195,41 @@
   }
   .livres-vazio{color:var(--muted);font-size:clamp(13px,2vh,24px)}
 
+  .slot-livre{cursor:pointer;transition:background .15s,transform .1s;font-family:inherit;border-style:solid}
+  .slot-livre:hover{background:rgba(46,204,113,.22)}
+  .slot-livre:active{transform:scale(.94)}
+
+  /* ═══ MODAL AGENDAMENTO RÁPIDO ═══ */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(4px);
+    display:none;align-items:center;justify-content:center;z-index:100;padding:4vw;
+  }
+  .modal-overlay.aberto{display:flex}
+  .modal-box{
+    background:var(--panel);border:1px solid var(--line);border-radius:16px;
+    padding:28px;width:min(480px,92vw);max-height:92vh;overflow:auto;
+    box-shadow:0 20px 60px rgba(0,0,0,.6);
+  }
+  .modal-titulo{font-size:24px;font-weight:800;color:var(--gold);margin-bottom:18px;text-align:center}
+  .modal-titulo span{color:var(--txt)}
+  .modal-label{display:block;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin:14px 0 6px}
+  .modal-input{
+    width:100%;background:#0d0d0f;border:1px solid var(--line);color:var(--txt);
+    border-radius:10px;padding:14px;font-size:17px;font-family:inherit;
+  }
+  .modal-input:focus{outline:none;border-color:var(--gold)}
+  select.modal-input{cursor:pointer}
+  .modal-erro{color:#e74c3c;font-size:14px;margin-top:10px;min-height:18px}
+  .modal-acoes{display:flex;gap:12px;margin-top:22px}
+  .modal-btn{
+    flex:1;padding:15px;border:none;border-radius:10px;font-size:16px;font-weight:700;
+    cursor:pointer;font-family:inherit;transition:opacity .15s;
+  }
+  .modal-btn:active{opacity:.8}
+  .modal-btn.cancelar{background:var(--line);color:var(--txt)}
+  .modal-btn.confirmar{background:var(--gold);color:#000}
+  .modal-btn.confirmar:disabled{opacity:.5;cursor:not-allowed}
+
   /* Animação de troca de orientação */
   main{transition:opacity .25s ease}
   main.trocando{opacity:0;transform:scale(.98)}
@@ -247,9 +282,27 @@
     <div id="resumo-dia">—</div>
   </footer>
 
+  <!-- Modal de agendamento rápido pelo monitor -->
+  <div class="modal-overlay" id="modal-rapido">
+    <div class="modal-box">
+      <div class="modal-titulo">Agendar às <span id="mr-hora">--:--</span></div>
+      <label class="modal-label">Nome do cliente</label>
+      <input type="text" id="mr-nome" class="modal-input" placeholder="Ex: João da Silva" autocomplete="off">
+      <label class="modal-label">Telefone / WhatsApp</label>
+      <input type="tel" id="mr-tel" class="modal-input" placeholder="Ex: 11987654321" inputmode="numeric" autocomplete="off">
+      <label class="modal-label">Serviço</label>
+      <select id="mr-servico" class="modal-input"></select>
+      <div id="mr-erro" class="modal-erro"></div>
+      <div class="modal-acoes">
+        <button class="modal-btn cancelar" onclick="fecharAgendamentoRapido()">Cancelar</button>
+        <button class="modal-btn confirmar" id="mr-confirmar" onclick="confirmarAgendamentoRapido()">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
+import { getDatabase, ref, onValue, push, set } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC1mkw9lTCa1khBcTNBHf4nC_MkC9lECIk",
@@ -291,6 +344,12 @@ setInterval(tickRelogio, 1000);
 let agendamentosDia = [];      // só clientes reais (para a fila)
 let ocupadosDia = [];          // todos, incluindo BLOQUEADO (para calcular livres)
 let horariosFuncionamento = null;
+let servicosDisponiveis = {};
+
+// serviços (para o agendamento rápido pelo monitor)
+onValue(ref(db, 'servicos'), (snap) => {
+  servicosDisponiveis = snap.val() || {};
+});
 
 // horário de funcionamento (para saber abertura/fechamento do dia)
 onValue(ref(db, 'horarios_funcionamento'), (snap) => {
@@ -485,8 +544,95 @@ function renderLivres(){
     lista.innerHTML = '<span class="livres-vazio">Nenhum horário livre restante hoje</span>';
     return;
   }
-  lista.innerHTML = livres.map(h => `<span class="slot-livre">${h}</span>`).join('');
+  lista.innerHTML = livres.map(h => `<button class="slot-livre" onclick="abrirAgendamentoRapido('${h}')">${h}</button>`).join('');
 }
+
+// ── Agendamento rápido pelo monitor ──
+let horaRapidoSelecionada = null;
+
+window.abrirAgendamentoRapido = function(hora){
+  horaRapidoSelecionada = hora;
+  document.getElementById('mr-hora').textContent = hora;
+  document.getElementById('mr-nome').value = '';
+  document.getElementById('mr-tel').value = '';
+  document.getElementById('mr-erro').textContent = '';
+
+  // popula serviços ordenados por nome
+  const sel = document.getElementById('mr-servico');
+  const ordenados = Object.entries(servicosDisponiveis)
+    .filter(([,s]) => s && s.nome)
+    .sort((a,b) => (a[1].nome||'').localeCompare(b[1].nome||''));
+  sel.innerHTML = ordenados.map(([id,s]) =>
+    `<option value="${id}">${s.nome} · ${s.duracao||20}min${Number(s.preco)>0?` · R$${s.preco}`:''}</option>`
+  ).join('');
+
+  document.getElementById('modal-rapido').classList.add('aberto');
+  setTimeout(() => document.getElementById('mr-nome').focus(), 100);
+};
+
+window.fecharAgendamentoRapido = function(){
+  document.getElementById('modal-rapido').classList.remove('aberto');
+  horaRapidoSelecionada = null;
+};
+
+window.confirmarAgendamentoRapido = async function(){
+  const nome = document.getElementById('mr-nome').value.trim();
+  const tel = document.getElementById('mr-tel').value.replace(/\D/g,'');
+  const servId = document.getElementById('mr-servico').value;
+  const erro = document.getElementById('mr-erro');
+  const btn = document.getElementById('mr-confirmar');
+
+  if (!nome){ erro.textContent = 'Informe o nome do cliente.'; return; }
+  if (tel.length < 8){ erro.textContent = 'Telefone inválido.'; return; }
+  const serv = servicosDisponiveis[servId];
+  if (!serv){ erro.textContent = 'Selecione um serviço.'; return; }
+
+  // Revalida: o horário ainda está livre? (evita corrida se alguém agendou junto)
+  const inicio = minutos(horaRapidoSelecionada);
+  const fim = inicio + (Number(serv.duracao)||20);
+  const conflito = ocupadosDia.some(a => {
+    const i = minutos(a.hora); const f = i + (Number(a.duracao)||20);
+    return inicio < f && fim > i;
+  });
+  if (conflito){ erro.textContent = 'Esse horário acabou de ser ocupado. Escolha outro.'; return; }
+
+  btn.disabled = true; btn.textContent = 'Salvando...';
+  erro.textContent = '';
+
+  try {
+    const hoje = hojeStr();
+    const novaRef = push(ref(db, 'agendamentos'));
+    const ag = {
+      id: novaRef.key,
+      cliente: nome, whatsapp: tel,
+      servicoId: servId, servicoNome: serv.nome,
+      valor: Number(serv.preco)||0, valorFinal: Number(serv.preco)||0, valorExtra: 0,
+      data: hoje, hora: horaRapidoSelecionada, duracao: Number(serv.duracao)||20,
+      formaPagamento: 'presencial', criadoPor: 'monitor',
+      ehPlano: false, notificado: false, timestamp: Date.now()
+    };
+    await set(novaRef, ag);
+    // dispara o webhook no mesmo formato do site
+    try {
+      await fetch('https://n8n.oreonsolucoes.dpdns.org/webhook/barbearia', {
+        method: 'POST', mode: 'no-cors',
+        headers: { 'ngrok-skip-browser-warning': 'true' },
+        body: JSON.stringify(ag)
+      });
+    } catch(e){ console.error('webhook:', e); }
+
+    fecharAgendamentoRapido();
+  } catch(e){
+    console.error(e);
+    erro.textContent = 'Erro ao salvar. Tente de novo.';
+    btn.disabled = false; btn.textContent = 'Confirmar';
+  }
+};
+
+// fecha modal ao clicar fora
+document.getElementById('modal-rapido').addEventListener('click', (e) => {
+  if (e.target.id === 'modal-rapido') fecharAgendamentoRapido();
+});
 
 // ── Auto-scroll da fila quando não cabe tudo na tela ──
 let scrollTimer = null;
