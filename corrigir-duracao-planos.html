@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Correção: Duração Planos</title>
+  <style>
+    body { background: #111; color: #eee; font-family: monospace; padding: 24px; }
+    h1 { color: #d4af37; }
+    .card { background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 16px; margin-bottom: 10px; }
+    .card.afetado { border-color: #ff6b35; }
+    .card.ok { border-color: #4caf50; }
+    .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; margin-left: 8px; }
+    .tag.erro { background: #ff6b3530; color: #ff6b35; }
+    .tag.corrigido { background: #4caf5030; color: #4caf50; }
+    .tag.passado { background: #55555530; color: #aaa; }
+    button { background: #d4af37; color: #000; border: none; padding: 12px 24px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 16px; font-size: 15px; }
+    button:disabled { background: #555; color: #999; cursor: default; }
+    #log { background: #0a0a0a; border: 1px solid #333; border-radius: 6px; padding: 12px; margin-top: 16px; font-size: 12px; line-height: 1.8; max-height: 300px; overflow-y: auto; }
+    .linha-log { color: #aaa; }
+    .linha-log.ok { color: #4caf50; }
+    .linha-log.err { color: #ff4444; }
+    #resumo { margin: 16px 0; padding: 12px; background: #1a1a1a; border-radius: 6px; border: 1px solid #d4af3750; }
+  </style>
+</head>
+<body>
+
+<h1>🔧 Correção: Duração de Agendamentos de Plano Normal</h1>
+<p style="color:#aaa;">Este script identifica agendamentos de planos normais com <code>duracao: 30</code> e corrige para <code>duracao: 20</code>.</p>
+
+<div id="resumo">Carregando agendamentos...</div>
+<div id="lista"></div>
+
+<button id="btn-corrigir" disabled>Corrigir todos os afetados</button>
+<div id="log" style="display:none"></div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+  import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyC1mkw9lTCa1khBcTNBHf4nC_MkC9lECIk",
+    authDomain: "barbearia-sf1-0.firebaseapp.com",
+    databaseURL: "https://barbearia-sf1-0-default-rtdb.firebaseio.com",
+    projectId: "barbearia-sf1-0",
+    storageBucket: "barbearia-sf1-0.firebasestorage.app",
+    messagingSenderId: "638200163686",
+    appId: "1:638200163686:web:d6e615289d181b9da62ca7"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  const lista = document.getElementById('lista');
+  const resumo = document.getElementById('resumo');
+  const btnCorrigir = document.getElementById('btn-corrigir');
+  const logEl = document.getElementById('log');
+
+  const hoje = new Date().toISOString().slice(0, 10);
+
+  function log(msg, tipo = '') {
+    logEl.style.display = 'block';
+    const linha = document.createElement('div');
+    linha.className = `linha-log ${tipo}`;
+    linha.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    logEl.appendChild(linha);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  // Carrega agendamentos do Firebase
+  const snap = await get(ref(db, 'agendamentos'));
+  const todos = snap.val() || {};
+
+  const afetados = [];
+
+  for (const [key, ag] of Object.entries(todos)) {
+    if (!ag || typeof ag !== 'object') continue;
+    if (ag.ehPlano && !ag.isFlex && Number(ag.duracao) === 30) {
+      afetados.push({ key, ...ag });
+    }
+  }
+
+  if (afetados.length === 0) {
+    resumo.innerHTML = '✅ <strong>Nenhum agendamento afetado encontrado.</strong> Tudo certo!';
+    return;
+  }
+
+  resumo.innerHTML = `
+    ⚠️ Encontrados <strong>${afetados.length} agendamentos</strong> de plano normal com <code>duracao: 30</code> que precisam ser corrigidos para <code>20</code>.
+  `;
+
+  // Renderiza cards
+  afetados.forEach(ag => {
+    const passado = ag.data < hoje;
+    const card = document.createElement('div');
+    card.className = `card afetado`;
+    card.id = `card-${ag.key}`;
+    card.innerHTML = `
+      <strong>${ag.cliente || '—'}</strong>
+      <span class="tag erro">duracao: 30</span>
+      ${passado ? '<span class="tag passado">passado</span>' : '<span class="tag erro">⚡ ativo</span>'}
+      <br>
+      <small style="color:#aaa">${ag.data} às ${ag.hora} — ${ag.servicoNome || ag.servicoId}</small>
+      <br>
+      <small style="color:#555">key: ${ag.key}</small>
+    `;
+    lista.appendChild(card);
+  });
+
+  btnCorrigir.disabled = false;
+  btnCorrigir.textContent = `✏️ Corrigir ${afetados.length} agendamentos`;
+
+  btnCorrigir.onclick = async () => {
+    btnCorrigir.disabled = true;
+    btnCorrigir.textContent = 'Corrigindo...';
+
+    let ok = 0, err = 0;
+
+    for (const ag of afetados) {
+      try {
+        await update(ref(db, `agendamentos/${ag.key}`), { duracao: 20 });
+        log(`✅ ${ag.cliente} — ${ag.data} ${ag.hora} → duracao: 20`, 'ok');
+        const card = document.getElementById(`card-${ag.key}`);
+        if (card) {
+          card.className = 'card ok';
+          card.querySelector('.tag.erro')?.remove();
+          const tag = document.createElement('span');
+          tag.className = 'tag corrigido';
+          tag.textContent = 'duracao: 20 ✓';
+          card.querySelector('strong').after(tag);
+        }
+        ok++;
+      } catch (e) {
+        log(`❌ Erro em ${ag.key}: ${e.message}`, 'err');
+        err++;
+      }
+    }
+
+    resumo.innerHTML = `
+      ✅ Correção concluída: <strong>${ok} corrigidos</strong>${err ? `, <strong style="color:#ff4444">${err} com erro</strong>` : ''}.
+    `;
+    btnCorrigir.textContent = 'Concluído';
+  };
+</script>
+</body>
+</html>
