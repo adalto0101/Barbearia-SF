@@ -561,7 +561,7 @@ btnConfirmarTudo.onclick = async (e) => {
                 servicoId: `plano_${ass.planoId}`,
                 servicoNome: nomeServico,
                 valor: valorFinal, valorFinal, valorExtra: 0,
-                data, hora, duracao: 30,
+                data, hora, duracao: 20,
                 formaPagamento: usos === 0 ? 'pendente_plano' : 'plano_incluso',
                 criadoPor: 'cliente', ehPlano: true, isFlex: false,
                 planoId: ass.planoId, planoNome: ass.planoNome,
