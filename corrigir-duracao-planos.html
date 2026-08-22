@@ -25,11 +25,10 @@
 <body>
 
 <h1>🔧 Correção: Duração de Agendamentos de Plano Normal</h1>
-<p style="color:#aaa;">Este script identifica agendamentos de planos normais com <code>duracao: 30</code> e corrige para <code>duracao: 20</code>.</p>
+<p style="color:#aaa;">Identifica agendamentos de planos normais com <code>duracao: 30</code> e corrige para <code>duracao: 20</code>.</p>
 
 <div id="resumo">Carregando agendamentos...</div>
 <div id="lista"></div>
-
 <button id="btn-corrigir" disabled>Corrigir todos os afetados</button>
 <div id="log" style="display:none"></div>
 
@@ -54,7 +53,6 @@
   const resumo = document.getElementById('resumo');
   const btnCorrigir = document.getElementById('btn-corrigir');
   const logEl = document.getElementById('log');
-
   const hoje = new Date().toISOString().slice(0, 10);
 
   function log(msg, tipo = '') {
@@ -66,80 +64,79 @@
     logEl.scrollTop = logEl.scrollHeight;
   }
 
-  // Carrega agendamentos do Firebase
-  const snap = await get(ref(db, 'agendamentos'));
-  const todos = snap.val() || {};
+  async function init() {
+    const snap = await get(ref(db, 'agendamentos'));
+    const todos = snap.val() || {};
+    const afetados = [];
 
-  const afetados = [];
-
-  for (const [key, ag] of Object.entries(todos)) {
-    if (!ag || typeof ag !== 'object') continue;
-    if (ag.ehPlano && !ag.isFlex && Number(ag.duracao) === 30) {
-      afetados.push({ key, ...ag });
-    }
-  }
-
-  if (afetados.length === 0) {
-    resumo.innerHTML = '✅ <strong>Nenhum agendamento afetado encontrado.</strong> Tudo certo!';
-    return;
-  }
-
-  resumo.innerHTML = `
-    ⚠️ Encontrados <strong>${afetados.length} agendamentos</strong> de plano normal com <code>duracao: 30</code> que precisam ser corrigidos para <code>20</code>.
-  `;
-
-  // Renderiza cards
-  afetados.forEach(ag => {
-    const passado = ag.data < hoje;
-    const card = document.createElement('div');
-    card.className = `card afetado`;
-    card.id = `card-${ag.key}`;
-    card.innerHTML = `
-      <strong>${ag.cliente || '—'}</strong>
-      <span class="tag erro">duracao: 30</span>
-      ${passado ? '<span class="tag passado">passado</span>' : '<span class="tag erro">⚡ ativo</span>'}
-      <br>
-      <small style="color:#aaa">${ag.data} às ${ag.hora} — ${ag.servicoNome || ag.servicoId}</small>
-      <br>
-      <small style="color:#555">key: ${ag.key}</small>
-    `;
-    lista.appendChild(card);
-  });
-
-  btnCorrigir.disabled = false;
-  btnCorrigir.textContent = `✏️ Corrigir ${afetados.length} agendamentos`;
-
-  btnCorrigir.onclick = async () => {
-    btnCorrigir.disabled = true;
-    btnCorrigir.textContent = 'Corrigindo...';
-
-    let ok = 0, err = 0;
-
-    for (const ag of afetados) {
-      try {
-        await update(ref(db, `agendamentos/${ag.key}`), { duracao: 20 });
-        log(`✅ ${ag.cliente} — ${ag.data} ${ag.hora} → duracao: 20`, 'ok');
-        const card = document.getElementById(`card-${ag.key}`);
-        if (card) {
-          card.className = 'card ok';
-          card.querySelector('.tag.erro')?.remove();
-          const tag = document.createElement('span');
-          tag.className = 'tag corrigido';
-          tag.textContent = 'duracao: 20 ✓';
-          card.querySelector('strong').after(tag);
-        }
-        ok++;
-      } catch (e) {
-        log(`❌ Erro em ${ag.key}: ${e.message}`, 'err');
-        err++;
+    for (const [key, ag] of Object.entries(todos)) {
+      if (!ag || typeof ag !== 'object') continue;
+      if (ag.ehPlano && !ag.isFlex && Number(ag.duracao) === 30) {
+        afetados.push({ key, ...ag });
       }
     }
 
-    resumo.innerHTML = `
-      ✅ Correção concluída: <strong>${ok} corrigidos</strong>${err ? `, <strong style="color:#ff4444">${err} com erro</strong>` : ''}.
-    `;
-    btnCorrigir.textContent = 'Concluído';
-  };
+    if (afetados.length === 0) {
+      resumo.innerHTML = '✅ <strong>Nenhum agendamento afetado encontrado.</strong> Tudo certo!';
+      return;
+    }
+
+    resumo.innerHTML = `⚠️ Encontrados <strong>${afetados.length} agendamentos</strong> de plano normal com <code>duracao: 30</code> que serão corrigidos para <code>20</code>.`;
+
+    afetados.forEach(ag => {
+      const passado = ag.data < hoje;
+      const card = document.createElement('div');
+      card.className = 'card afetado';
+      card.id = `card-${ag.key}`;
+      card.innerHTML = `
+        <strong>${ag.cliente || '—'}</strong>
+        <span class="tag erro">duracao: 30</span>
+        ${passado ? '<span class="tag passado">passado</span>' : '<span class="tag erro">⚡ ativo</span>'}
+        <br>
+        <small style="color:#aaa">${ag.data} às ${ag.hora} — ${ag.servicoNome || ag.servicoId || ''}</small>
+        <br>
+        <small style="color:#555">key: ${ag.key}</small>
+      `;
+      lista.appendChild(card);
+    });
+
+    btnCorrigir.disabled = false;
+    btnCorrigir.textContent = `✏️ Corrigir ${afetados.length} agendamentos`;
+
+    btnCorrigir.onclick = async () => {
+      btnCorrigir.disabled = true;
+      btnCorrigir.textContent = 'Corrigindo...';
+      let ok = 0, err = 0;
+
+      for (const ag of afetados) {
+        try {
+          await update(ref(db, `agendamentos/${ag.key}`), { duracao: 20 });
+          log(`✅ ${ag.cliente} — ${ag.data} ${ag.hora} → duracao: 20`, 'ok');
+          const card = document.getElementById(`card-${ag.key}`);
+          if (card) {
+            card.className = 'card ok';
+            card.querySelector('.tag.erro')?.remove();
+            const tag = document.createElement('span');
+            tag.className = 'tag corrigido';
+            tag.textContent = 'duracao: 20 ✓';
+            card.querySelector('strong').after(tag);
+          }
+          ok++;
+        } catch (e) {
+          log(`❌ Erro em ${ag.key}: ${e.message}`, 'err');
+          err++;
+        }
+      }
+
+      resumo.innerHTML = `✅ Correção concluída: <strong>${ok} corrigidos</strong>${err ? `, <strong style="color:#ff4444">${err} com erro</strong>` : ''}.`;
+      btnCorrigir.textContent = 'Concluído';
+    };
+  }
+
+  init().catch(e => {
+    resumo.innerHTML = `❌ Erro ao carregar: ${e.message}`;
+    console.error(e);
+  });
 </script>
 </body>
 </html>
